@@ -1,22 +1,22 @@
 // api/chat.js
 
 export default async function handler(req, res) {
-  // CORS ayarları (GitHub Pages'ten istek gelsin diye)
+  // ===== CORS AYARLARI =====
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-  // Preflight (OPTIONS) isteği geldiyse hemen dön
+  // Preflight isteği
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
+  // ===== CORS BİTTİ =====
 
-  // Sağlık kontrolü için GET
+  // Basit sağlık kontrolü
   if (req.method === "GET") {
     return res.status(200).json({ status: "ok", name: "MØR•AI backend" });
   }
 
-  // Sadece POST ile sohbet alacağız
   if (req.method !== "POST") {
     return res
       .status(405)
@@ -44,18 +44,18 @@ export default async function handler(req, res) {
             {
               role: "system",
               content:
-                "Sen MØR•AI isimli Türkçe konuşan yardımcı botsun. Sallamadan, kısa ama net cevaplar ver. Emin olmadığın konularda 'bilmiyorum' de.",
+                "Sen MØR•AI isimli Türkçe konuşan bir asistansın. Sallamadan, net ve kısa cevaplar ver. Emin olmadığın konularda 'bilmiyorum' de.",
             },
             { role: "user", content: message },
           ],
-          max_tokens: 350,
+          max_tokens: 300,
         }),
       }
     );
 
     if (!openaiRes.ok) {
-      const errText = await openaiRes.text();
-      console.error("OpenAI hata:", errText);
+      const txt = await openaiRes.text();
+      console.error("OpenAI hata:", txt);
       return res
         .status(500)
         .json({ error: "OpenAI isteği başarısız oldu, loglara bakmak lazım." });
@@ -64,13 +64,13 @@ export default async function handler(req, res) {
     const data = await openaiRes.json();
     const reply =
       data.choices?.[0]?.message?.content ||
-      "Cevap alınamadı reis, birazdan tekrar dener misin?";
+      "Reis, OpenAI'den düzgün bir cevap çekemedim.";
 
     return res.status(200).json({ reply });
   } catch (err) {
     console.error("Sunucu hatası:", err);
     return res.status(500).json({
-      error: "Sunucu tarafında bir hata oluştu, biraz sonra tekrar dene reis.",
+      error: "Sunucu tarafında bir hata oluştu.",
     });
   }
 }
