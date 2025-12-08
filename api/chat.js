@@ -1,15 +1,16 @@
 // api/chat.js
 
 export default async function handler(req, res) {
-  // CORS AYARLARI: GitHub Pages (mehmet803.github.io) için izin ver
+  // ===== CORS AYARLARI =====
   res.setHeader("Access-Control-Allow-Origin", "https://mehmet803.github.io");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-  // Preflight (OPTIONS) isteğini hemen döndür
+  // Preflight (OPTIONS) isteği
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
+  // =========================
 
   // Sağlık kontrolü
   if (req.method === "GET") {
