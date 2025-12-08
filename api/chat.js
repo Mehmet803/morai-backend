@@ -1,8 +1,8 @@
 // api/chat.js
 
 export default async function handler(req, res) {
-  // ===== CORS AYARLARI =====
-  res.setHeader("Access-Control-Allow-Origin", "https://mehmet803.github.io");
+  // ===== CORS AYARLARI (aynı origin için de dursun) =====
+  res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
@@ -10,7 +10,7 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
-  // =========================
+  // =====================================================
 
   // Sağlık kontrolü
   if (req.method === "GET") {
@@ -28,7 +28,6 @@ export default async function handler(req, res) {
   }
 
   try {
-    // OpenAI Chat Completion isteği
     const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
