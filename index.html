@@ -5,10 +5,15 @@
   <title>MØR•AI v7 — GPT bağlantılı</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
     body {
       margin: 0;
-      background: #050816;
-      font-family: sans-serif;
+      background: radial-gradient(circle at top, #1b2340, #050816);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: white;
       display: flex;
       justify-content: center;
@@ -16,23 +21,48 @@
       height: 100vh;
     }
     .container {
-      width: 90%;
-      max-width: 600px;
+      width: 95%;
+      max-width: 700px;
       height: 90vh;
-      background: #101524;
-      border-radius: 14px;
+      background: rgba(8, 12, 30, 0.95);
+      border-radius: 16px;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      border: 1px solid #2a2f45;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      box-shadow: 0 22px 60px rgba(0, 0, 0, 0.7);
     }
     .header {
-      text-align: center;
-      padding: 12px;
-      background: #192040;
+      padding: 12px 16px;
+      background: linear-gradient(90deg, #161c38, #131933);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .title-box {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .title {
       font-size: 18px;
-      letter-spacing: 2px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
+    }
+    .subtitle {
+      font-size: 11px;
+      opacity: 0.8;
+      color: #a5b0ff;
+    }
+    .badge {
+      font-size: 10px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(120, 207, 255, 0.7);
+      color: #78cfff;
+      background: rgba(120, 207, 255, 0.12);
     }
     .chat {
       flex: 1;
@@ -41,79 +71,219 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+    }
+    .chat::-webkit-scrollbar {
+      width: 6px;
+    }
+    .chat::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.25);
+      border-radius: 999px;
+    }
+    .bubble-row {
+      display: flex;
+    }
+    .bubble-row.me {
+      justify-content: flex-end;
+    }
+    .bubble-row.bot {
+      justify-content: flex-start;
     }
     .bubble {
-      max-width: 80%;
+      max-width: 75%;
       padding: 10px 12px;
-      border-radius: 12px;
+      border-radius: 14px;
       word-wrap: break-word;
       white-space: pre-wrap;
       font-size: 14px;
+      line-height: 1.4;
+      position: relative;
     }
-    .me {
-      align-self: flex-end;
-      background: #4b7bff;
+    .bubble.me {
+      background: linear-gradient(135deg, #4b7bff, #9d6bff);
+      color: #fff;
       border-bottom-right-radius: 4px;
     }
-    .bot {
-      align-self: flex-start;
-      background: #262d44;
+    .bubble.bot {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       border-bottom-left-radius: 4px;
+      color: #e7e9ff;
+    }
+    .time {
+      font-size: 10px;
+      opacity: 0.6;
+      margin-top: 3px;
+      text-align: right;
     }
     .input-area {
       display: flex;
       padding: 10px;
-      gap: 10px;
-      background: #0c1020;
+      gap: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(5, 8, 22, 0.96);
+      backdrop-filter: blur(12px);
     }
-    input {
+    #input {
       flex: 1;
-      padding: 10px;
+      padding: 10px 14px;
       border-radius: 999px;
-      border: none;
-      outline: none;
-      background: #1a1f34;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.03);
       color: white;
+      outline: none;
+      font-size: 14px;
     }
-    button {
-      padding: 10px 18px;
+    #input::placeholder {
+      color: rgba(180, 188, 255, 0.7);
+    }
+    #sendBtn {
+      padding: 0 18px;
       border-radius: 999px;
-      background: #ff7a7a;
-      color: black;
       border: none;
-      font-weight: bold;
+      background: linear-gradient(135deg, #ff7a7a, #ffb36b);
+      color: #1b102a;
+      font-weight: 600;
+      font-size: 14px;
       cursor: pointer;
+      white-space: nowrap;
+    }
+    #sendBtn:active {
+      transform: translateY(1px) scale(0.98);
+    }
+    .status {
+      font-size: 11px;
+      padding: 4px 12px 8px;
+      opacity: 0.7;
+    }
+    .typing {
+      font-size: 12px;
+      opacity: 0.7;
+      margin-top: 4px;
+    }
+    .typing span {
+      display: inline-block;
+      width: 4px;
+      height: 4px;
+      margin-right: 3px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.7);
+      animation: blink 1s infinite ease-in-out;
+    }
+    .typing span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    .typing span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+    @keyframes blink {
+      0%, 80%, 100% { opacity: 0.2; transform: translateY(0); }
+      40% { opacity: 1; transform: translateY(-2px); }
+    }
+    @media (max-width: 600px) {
+      .container {
+        height: 100vh;
+        border-radius: 0;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="header">MØR•AI</div>
+    <div class="header">
+      <div class="title-box">
+        <div class="title">MØR•AI</div>
+        <div class="subtitle">GPT bağlantılı sohbet asistanı</div>
+      </div>
+      <div class="badge">v7 • beta</div>
+    </div>
     <div id="chat" class="chat"></div>
+    <div class="status" id="status">Bağlantı durumu: bilinmiyor</div>
     <div class="input-area">
-      <input type="text" id="input" placeholder="Bir şey yaz...">
-      <button onclick="sendMessage()">Gönder</button>
+      <input
+        type="text"
+        id="input"
+        placeholder="Bir şey yaz... Örn: 'Türkiye’nin başkenti neresidir?'"
+      />
+      <button id="sendBtn">Gönder</button>
     </div>
   </div>
 
   <script>
-    const chat = document.getElementById("chat");
-    const input = document.getElementById("input");
+    const chatEl = document.getElementById("chat");
+    const inputEl = document.getElementById("input");
+    const sendBtn = document.getElementById("sendBtn");
+    const statusEl = document.getElementById("status");
 
     function addBubble(text, who) {
-      const div = document.createElement("div");
-      div.className = "bubble " + who;
-      div.textContent = text;
-      chat.appendChild(div);
-      chat.scrollTop = chat.scrollHeight;
+      const row = document.createElement("div");
+      row.className = "bubble-row " + who;
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble " + who;
+      bubble.textContent = text;
+
+      const time = document.createElement("div");
+      time.className = "time";
+      time.textContent = new Date().toLocaleTimeString().slice(0, 5);
+
+      bubble.appendChild(time);
+      row.appendChild(bubble);
+      chatEl.appendChild(row);
+      chatEl.scrollTop = chatEl.scrollHeight;
+      return row;
+    }
+
+    function addTyping() {
+      const row = document.createElement("div");
+      row.className = "bubble-row bot";
+      const bubble = document.createElement("div");
+      bubble.className = "bubble bot";
+
+      const t = document.createElement("div");
+      t.className = "typing";
+      t.innerHTML = "<span></span><span></span><span></span>";
+
+      bubble.appendChild(t);
+      row.appendChild(bubble);
+      chatEl.appendChild(row);
+      chatEl.scrollTop = chatEl.scrollHeight;
+      return row;
+    }
+
+    function removeRow(row) {
+      if (row && row.parentNode) {
+        row.parentNode.removeChild(row);
+      }
+    }
+
+    async function checkBackend() {
+      try {
+        const res = await fetch("/api/chat", { method: "GET" });
+        if (!res.ok) {
+          statusEl.textContent = "Bağlantı durumu: backend cevap vermiyor (" + res.status + ")";
+          return;
+        }
+        const data = await res.json();
+        if (data.status === "ok") {
+          statusEl.textContent = "Bağlantı durumu: online ✔";
+        } else {
+          statusEl.textContent = "Bağlantı durumu: beklenmedik cevap";
+        }
+      } catch (e) {
+        statusEl.textContent = "Bağlantı durumu: erişilemedi (internet / sunucu)";
+      }
     }
 
     async function sendMessage() {
-      const text = input.value.trim();
+      const text = inputEl.value.trim();
       if (!text) return;
 
       addBubble(text, "me");
-      input.value = "";
+      inputEl.value = "";
+
+      const typingRow = addTyping();
 
       try {
         const res = await fetch("/api/chat", {
@@ -122,14 +292,38 @@
           body: JSON.stringify({ message: text })
         });
 
+        if (!res.ok) {
+          removeRow(typingRow);
+          addBubble("Reis, backend cevap veremedi. (HTTP " + res.status + ")", "bot");
+          return;
+        }
+
         const data = await res.json();
-        addBubble(data.reply || "Boş cevap geldi", "bot");
-      } catch {
-        addBubble("Reis internet/sunucu sıkıntısı var", "bot");
+        removeRow(typingRow);
+        addBubble(data.reply || "Boş cevap geldi.", "bot");
+      } catch (err) {
+        console.error(err);
+        removeRow(typingRow);
+        addBubble("Reis, bağlantı hatası var gibi. (internet / sunucu)", "bot");
       }
     }
 
-    addBubble("Selam reis 👑.\nBen MØR•AI v7.\nSor bakalım 🔥", "bot");
+    sendBtn.addEventListener("click", sendMessage);
+
+    inputEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    addBubble(
+      "Selam reis 👑\nBen MØR•AI v7.\n\nGPT'ye bağlıyım; sallamam, uydurmam.\n" +
+      "Başlamak için bir soru yazabilirsin. 🔥",
+      "bot"
+    );
+
+    checkBackend();
   </script>
 </body>
 </html>
