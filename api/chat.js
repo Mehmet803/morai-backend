@@ -1,28 +1,23 @@
-// api/chat.js
-
 export default async function handler(req, res) {
-  // ===== CORS AYARLARI (aynı origin için de dursun) =====
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  res.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-  // Preflight (OPTIONS) isteği
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
-  // =====================================================
 
-  // Sağlık kontrolü
   if (req.method === "GET") {
     return res.status(200).json({ status: "ok", name: "MØR•AI backend" });
   }
 
-  // Sadece POST kabul
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Sadece POST istek kabul edilir." });
-  }
+  const body = await new Promise((resolve) => {
+    let data = "";
+    req.on("data", (chunk) => (data += chunk));
+    req.on("end", () => resolve(JSON.parse(data || "{}")));
+  });
 
-  const { message } = req.body || {};
+  const { message } = body;
   if (!message) {
     return res.status(400).json({ error: "message alanı zorunlu." });
   }
@@ -32,7 +27,6 @@ export default async function handler(req, res) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        // OPENAI_API_KEY Vercel Environment Variable içinde olmalı
         Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
@@ -41,33 +35,19 @@ export default async function handler(req, res) {
           {
             role: "system",
             content:
-              "Sen MØR•AI isimli Türkçe konuşan bir asistansın. Sallama, kısa ve net cevap ver. Emin olmadığın yerde 'bilmiyorum' de.",
+              "Sen MØR•AI isimli Türkçe bir asistansın. Cevapların net, kısa ve doğru olmalı.",
           },
-          {
-            role: "user",
-            content: message,
-          },
+          { role: "user", content: message },
         ],
-        max_tokens: 300,
       }),
     });
 
-    if (!openaiRes.ok) {
-      const errText = await openaiRes.text();
-      console.error("OpenAI hata:", errText);
-      return res
-        .status(500)
-        .json({ error: "OpenAI isteği başarısız oldu, loglara bakmak lazım." });
-    }
-
     const data = await openaiRes.json();
-    const reply =
-      data.choices?.[0]?.message?.content ||
-      "Reis, OpenAI'den düzgün bir cevap çekemedim.";
+    const reply = data.choices?.[0]?.message?.content || "Cevap alınamadı.";
 
     return res.status(200).json({ reply });
-  } catch (err) {
-    console.error("Sunucu hatası:", err);
-    return res.status(500).json({ error: "Sunucu tarafında bir hata oluştu." });
+  } catch (e) {
+    console.error("API ERROR:", e);
+    return res.status(500).json({ error: "Sunucu hatası" });
   }
 }
