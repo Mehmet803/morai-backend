@@ -1,4 +1,4 @@
-// API/chat.js
+// API/chat.js — GEMINI ÜCRETSİZ BACKEND
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -12,36 +12,41 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "message alanı gerekli" });
     }
 
-    const apiKey = process.env.OPENAI_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      return res.status(500).json({ error: "OPENAI_API_KEY eksik" });
+      return res.status(500).json({ error: "GEMINI_API_KEY eksik" });
     }
 
-    const openaiResponse = await fetch(
-      "https://api.openai.com/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          messages: [{ role: "user", content: message }],
-        }),
-      }
-    );
+    // GEMINI API endpoint
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
 
-    const data = await openaiResponse.json();
+    const geminiResponse = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        contents: [
+          { parts: [{ text: message }] }
+        ]
+      })
+    });
 
-    if (!openaiResponse.ok) {
-      console.error("OpenAI Error:", data);
-      return res.status(500).json({ error: "OpenAI hatası", detail: data });
+    const data = await geminiResponse.json();
+
+    // Hata varsa
+    if (!geminiResponse.ok) {
+      console.error("Gemini Error:", data);
+      return res.status(500).json({ error: "Gemini isteği başarısız", detail: data });
     }
 
-    const reply = data.choices?.[0]?.message?.content || "Boş yanıt";
+    // Gemini yanıt formatı
+    const reply =
+      data.candidates?.[0]?.content?.parts?.[0]?.text ||
+      "Boş yanıt (Gemini)";
 
     return res.status(200).json({ reply });
+
   } catch (err) {
     console.error("Backend error:", err);
     return res.status(500).json({ error: "Sunucu hatası", detail: err.message });
