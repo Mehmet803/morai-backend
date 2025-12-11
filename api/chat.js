@@ -1,4 +1,4 @@
-// API/chat.js — GEMINI ÜCRETSİZ BACKEND
+// API/chat.js — GEMINI BACKEND (güncellenmiş)
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -17,38 +17,49 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: "GEMINI_API_KEY eksik" });
     }
 
-    // GEMINI API endpoint
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
+    const url =
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" +
+      apiKey;
 
     const geminiResponse = await fetch(url, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        contents: [
-          { parts: [{ text: message }] }
-        ]
-      })
+        contents: [{ parts: [{ text: message }] }],
+      }),
     });
 
     const data = await geminiResponse.json();
 
-    // Hata varsa
     if (!geminiResponse.ok) {
       console.error("Gemini Error:", data);
-      return res.status(500).json({ error: "Gemini isteği başarısız", detail: data });
+      return res
+        .status(500)
+        .json({ error: "Gemini isteği başarısız", detail: data });
     }
 
-    // Gemini yanıt formatı
-    const reply =
-      data.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "Boş yanıt (Gemini)";
+    // ---- METNİ DAHA SAĞLAM ÇEK ----
+    const parts = data.candidates?.[0]?.content?.parts || [];
+    const text = parts
+      .map((p) => (typeof p.text === "string" ? p.text : ""))
+      .join("\n")
+      .trim();
+
+    let reply;
+    if (text) {
+      reply = text;
+    } else {
+      // Hâlâ metin yoksa ham yanıtı göster ki boş kalmasın
+      reply =
+        "Gemini'den beklenen metin gelmedi, ham yanıt:\n\n" +
+        JSON.stringify(data, null, 2);
+    }
 
     return res.status(200).json({ reply });
-
   } catch (err) {
     console.error("Backend error:", err);
-    return res.status(500).json({ error: "Sunucu hatası", detail: err.message });
+    return res
+      .status(500)
+      .json({ error: "Sunucu hatası", detail: err.message });
   }
 }
