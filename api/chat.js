@@ -1,4 +1,4 @@
-// API/chat.js — Gemini 1.5 Flash *DOĞRU MODEL* + düzgün hata mesajı
+// API/chat.js — Gemini 1.5 Flash / v1 endpoint (final)
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -23,23 +23,23 @@ export default async function handler(req, res) {
         .json({ reply: "Hata: Sunucuda GEMINI_API_KEY tanımlı değil." });
     }
 
-    // 🔥 DOĞRU MODEL BURADA
+    // 🔥 DOĞRU URL: v1 + gemini-1.5-flash
     const url =
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent";
+      "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=" +
+      apiKey;
 
     const geminiResponse = await fetch(url, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": apiKey,
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({
         contents: [
           {
-            parts: [{ text: message }],
-          },
-        ],
-      }),
+            parts: [{ text: message }]
+          }
+        ]
+      })
     });
 
     const rawText = await geminiResponse.text();
@@ -47,14 +47,14 @@ export default async function handler(req, res) {
     try {
       data = JSON.parse(rawText);
     } catch (_) {
-      // JSON değilse ham metni kullanacağız
+      // JSON parse edilemezse ham metni kullanacağız
     }
 
     let replyText = "";
 
     if (data && data.candidates && data.candidates[0]?.content?.parts) {
       replyText = data.candidates[0].content.parts
-        .map((p) => (typeof p.text === "string" ? p.text : ""))
+        .map(p => (typeof p.text === "string" ? p.text : ""))
         .join("\n")
         .trim();
     }
@@ -64,10 +64,7 @@ export default async function handler(req, res) {
         const code = data.error.code;
         const msg = data.error.message || "";
         replyText =
-          "Gemini bir hata döndürdü (kod: " +
-          code +
-          "): " +
-          msg;
+          "Gemini bir hata döndürdü (kod: " + code + "): " + msg;
       } else {
         replyText =
           "Gemini'den beklenen metin gelmedi. Ham yanıt:\n\n" + rawText;
@@ -77,7 +74,7 @@ export default async function handler(req, res) {
     return res.status(200).json({ reply: replyText });
   } catch (err) {
     return res.status(200).json({
-      reply: "Sunucu tarafında yakalanan bir hata oluştu:\n" + String(err),
+      reply: "Sunucu tarafında yakalanan bir hata oluştu:\n" + String(err)
     });
   }
 }
