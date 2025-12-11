@@ -1,6 +1,739 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+  <meta charset="UTF-8" />
+  <title>Chat Arayüzü</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    :root {
+      --bg: #f4f4f5;
+      --bg-elevated: #ffffff;
+      --border-subtle: #e4e4e7;
+      --accent: #0f766e;
+      --accent-soft: #ccfbf1;
+      --text-main: #0f172a;
+      --text-muted: #6b7280;
+      --user-bubble: #dbeafe;
+      --bot-bubble: #ffffff;
+      --scrollbar: #d4d4d8;
+    }
+
+    body[data-theme="dark"] {
+      --bg: #020617;
+      --bg-elevated: #020617;
+      --border-subtle: #1f2937;
+      --accent: #22c55e;
+      --accent-soft: #052e16;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --user-bubble: #022c22;
+      --bot-bubble: #020617;
+      --scrollbar: #4b5563;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      background: radial-gradient(circle at top, #e0f2fe 0, var(--bg) 40%);
+      color: var(--text-main);
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    body[data-theme="dark"] {
+      background: radial-gradient(
+        circle at top,
+        #020617 0,
+        #020617 40%,
+        #000 100%
+      );
+    }
+
+    .app {
+      display: flex;
+      height: 100vh;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* SOL SİDEBAR */
+
+    .sidebar {
+      width: 280px;
+      border-right: 1px solid var(--border-subtle);
+      background: linear-gradient(to bottom, var(--bg-elevated), var(--bg));
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      gap: 10px;
+    }
+
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 4px 2px;
+    }
+
+    .logo-text {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+
+    .badge {
+      font-size: 11px;
+      padding: 3px 7px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .new-chat-btn {
+      width: 100%;
+      padding: 8px 10px;
+      margin-top: 6px;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      background: #f9fafb;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      color: var(--text-main);
+    }
+
+    body[data-theme="dark"] .new-chat-btn {
+      background: #020617;
+    }
+
+    .new-chat-btn span.icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--accent);
+      color: white;
+      font-size: 13px;
+    }
+
+    .conversation-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 4px;
+    }
+
+    .conversation-list::-webkit-scrollbar {
+      width: 6px;
+    }
+    .conversation-list::-webkit-scrollbar-thumb {
+      background: var(--scrollbar);
+      border-radius: 999px;
+    }
+
+    .conv-item {
+      padding: 8px 9px;
+      border-radius: 8px;
+      margin-bottom: 4px;
+      font-size: 13px;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.15s ease, transform 0.05s ease;
+    }
+
+    .conv-item:hover {
+      background: #e5e7eb55;
+      transform: translateY(-1px);
+    }
+
+    .conv-item.active {
+      background: var(--accent-soft);
+      border: 1px solid var(--accent);
+    }
+
+    .conv-icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 6px;
+      background: rgba(15, 118, 110, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .conv-title {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+    }
+
+    .sidebar-footer {
+      border-top: 1px solid var(--border-subtle);
+      padding: 8px 4px 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .theme-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 9px;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      background: transparent;
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--text-main);
+    }
+
+    .theme-toggle .dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 999px;
+      background: var(--accent);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 11px;
+    }
+
+    /* CHAT ANA ALAN */
+
+    .chat {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-header {
+      height: 56px;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+      backdrop-filter: blur(10px);
+      background: linear-gradient(
+        to right,
+        rgba(248, 250, 252, 0.9),
+        rgba(255, 255, 255, 0.9)
+      );
+    }
+
+    body[data-theme="dark"] .chat-header {
+      background: linear-gradient(
+        to right,
+        rgba(15, 23, 42, 0.9),
+        rgba(15, 23, 42, 0.9)
+      );
+    }
+
+    .chat-header-title {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-header-title span.main {
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    .chat-header-title span.sub {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .chat-header-right {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 18px 12px;
+    }
+
+    .messages::-webkit-scrollbar {
+      width: 6px;
+    }
+    .messages::-webkit-scrollbar-thumb {
+      background: var(--scrollbar);
+      border-radius: 999px;
+    }
+
+    .message-row {
+      display: flex;
+      margin-bottom: 10px;
+    }
+
+    .message-row.user {
+      justify-content: flex-end;
+    }
+
+    .avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      margin-right: 8px;
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    body[data-theme="dark"] .avatar {
+      background: #111827;
+      color: #e5e7eb;
+    }
+
+    .message-row.user .avatar {
+      margin-left: 8px;
+      margin-right: 0;
+    }
+
+    .bubble {
+      max-width: 70%;
+      padding: 9px 11px;
+      border-radius: 12px;
+      font-size: 14px;
+      line-height: 1.4;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.07);
+      border: 1px solid transparent;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .bubble.user-bubble {
+      background: var(--user-bubble);
+      border-color: rgba(148, 163, 184, 0.3);
+    }
+
+    .bubble.bot-bubble {
+      background: var(--bot-bubble);
+      border-color: rgba(148, 163, 184, 0.3);
+    }
+
+    .timestamp {
+      margin-top: 2px;
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .chat-input-bar {
+      padding: 10px 14px 12px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+      background: linear-gradient(
+        to top,
+        var(--bg-elevated),
+        rgba(248, 250, 252, 0.9)
+      );
+    }
+
+    body[data-theme="dark"] .chat-input-bar {
+      background: linear-gradient(
+        to top,
+        #020617,
+        rgba(15, 23, 42, 0.95)
+      );
+    }
+
+    .input-wrapper {
+      flex: 1;
+      border-radius: 16px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-elevated);
+      padding: 6px 10px;
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+    textarea {
+      border: none;
+      outline: none;
+      resize: none;
+      width: 100%;
+      max-height: 130px;
+      min-height: 22px;
+      background: transparent;
+      color: var(--text-main);
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .send-btn {
+      border-radius: 999px;
+      border: none;
+      background: var(--accent);
+      color: white;
+      padding: 8px 13px;
+      cursor: pointer;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .send-btn:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .chat-header-right { display: none; }
+    }
+  </style>
+</head>
+
+<body data-theme="light">
+  <div class="app">
+    <!-- SOL TARAF: SOHBET LİSTESİ -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-text">Sohbetler</div>
+        <span class="badge">GPT bağlı</span>
+      </div>
+      <button class="new-chat-btn" id="newChatBtn">
+        <span class="icon">+</span>
+        <span>Yeni sohbet</span>
+      </button>
+
+      <div id="conversationList" class="conversation-list"></div>
+
+      <div class="sidebar-footer">
+        <button class="theme-toggle" id="themeToggle">
+          <span class="dot" id="themeDot">☀</span>
+          <span id="themeLabel">Gündüz modu</span>
+        </button>
+        <div>Ayarlar: buradan gece/gündüz modunu değiştirebilirsin.</div>
+      </div>
+    </aside>
+
+    <!-- SAĞ TARAF: CHAT -->
+    <main class="chat">
+      <header class="chat-header">
+        <div class="chat-header-title">
+          <span class="main" id="chatTitle">Yeni sohbet</span>
+          <span class="sub">Enter: gönder • Shift+Enter: satır atla</span>
+        </div>
+        <div class="chat-header-right">
+          Sohbet başlıkları otomatik oluşur
+        </div>
+      </header>
+
+      <section id="messages" class="messages"></section>
+
+      <footer class="chat-input-bar">
+        <div class="input-wrapper">
+          <textarea
+            id="userInput"
+            placeholder="Mesaj yaz ve Enter'a bas (Shift+Enter satır atlatır)..."
+          ></textarea>
+          <button class="send-btn" id="sendBtn">
+            <span id="sendLabel">Gönder</span> ➤
+          </button>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    // ================== BACKEND AYARI ==================
+    // Burayı kendi endpoint'ine göre değiştir:
+    const BACKEND_URL = "/api/chat"; // örnek: "/api/chat" veya "https://seninsite.com/api/chat"
+
+    // ================== VERİ YAPISI ====================
+    let conversations = [];
+    let currentId = null;
+    let isSending = false;
+
+    function createConversation(title) {
+      const id = Date.now().toString();
+      const conv = {
+        id,
+        title: title || "Yeni sohbet",
+        messages: [],
+      };
+      conversations.unshift(conv);
+      currentId = id;
+      renderConversations();
+      renderMessages();
+    }
+
+    function getCurrentConversation() {
+      return conversations.find((c) => c.id === currentId) || null;
+    }
+
+    // ================== SOL LİSTE ======================
+    function renderConversations() {
+      const list = document.getElementById("conversationList");
+      list.innerHTML = "";
+      conversations.forEach((conv) => {
+        const div = document.createElement("div");
+        div.className =
+          "conv-item" + (conv.id === currentId ? " active" : "");
+        div.onclick = () => {
+          currentId = conv.id;
+          renderConversations();
+          renderMessages();
+        };
+
+        const icon = document.createElement("div");
+        icon.className = "conv-icon";
+        icon.textContent = "✦";
+
+        const title = document.createElement("div");
+        title.className = "conv-title";
+        title.textContent = conv.title;
+
+        div.appendChild(icon);
+        div.appendChild(title);
+        list.appendChild(div);
+      });
+    }
+
+    // ================== MESAJLAR =======================
+    function renderMessages() {
+      const area = document.getElementById("messages");
+      area.innerHTML = "";
+      const conv = getCurrentConversation();
+      const chatTitle = document.getElementById("chatTitle");
+
+      if (!conv) {
+        chatTitle.textContent = "Sohbet yok";
+        return;
+      }
+
+      chatTitle.textContent = conv.title;
+
+      conv.messages.forEach((m) => {
+        const row = document.createElement("div");
+        row.className = "message-row " + (m.role === "user" ? "user" : "bot");
+
+        const bubble = document.createElement("div");
+        bubble.className =
+          "bubble " + (m.role === "user" ? "user-bubble" : "bot-bubble");
+        bubble.textContent = m.content;
+
+        const avatar = document.createElement("div");
+        avatar.className = "avatar";
+        avatar.textContent = m.role === "user" ? "Sen" : "AI";
+
+        const container = document.createElement("div");
+        const time = document.createElement("div");
+        time.className = "timestamp";
+        time.textContent = m.time || "";
+
+        container.appendChild(bubble);
+        container.appendChild(time);
+
+        if (m.role === "user") {
+          row.appendChild(container);
+          row.appendChild(avatar);
+        } else {
+          row.appendChild(avatar);
+          row.appendChild(container);
+        }
+
+        area.appendChild(row);
+      });
+
+      area.scrollTop = area.scrollHeight;
+    }
+
+    function formatTime(date = new Date()) {
+      return (
+        date.getHours().toString().padStart(2, "0") +
+        ":" +
+        date.getMinutes().toString().padStart(2, "0")
+      );
+    }
+
+    // ================== BACKEND'E GÖNDERME =============
+    async function sendToBackend(messageText) {
+      const conv = getCurrentConversation();
+      if (!conv) return "Sohbet bulunamadı.";
+
+      // sadece role + content yolluyoruz (time yok)
+      const cleanMessages = conv.messages.map((m) => ({
+        role: m.role === "assistant" ? "assistant" : "user",
+        content: m.content,
+      }));
+
+      // son kullanıcı mesajını da ekle (şu an zaten listede ama güvence olsun)
+      if (!cleanMessages.length || cleanMessages[cleanMessages.length - 1].content !== messageText) {
+        cleanMessages.push({ role: "user", content: messageText });
+      }
+
+      const res = await fetch(BACKEND_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: cleanMessages }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Backend hata döndürdü: " + res.status);
+      }
+
+      const data = await res.json();
+
+      // 1) {"reply": "..."} formatı
+      if (typeof data.reply === "string") {
+        return data.reply;
+      }
+
+      // 2) OpenAI formatı: {"choices":[{"message":{"content":"..."}}]}
+      const content =
+        data.choices?.[0]?.message?.content ||
+        data.choices?.[0]?.delta?.content ||
+        null;
+
+      if (content) return content;
+
+      // 3) Hiçbiri değilse, JSON'u string'e çevir
+      return JSON.stringify(data);
+    }
+
+    // ================== MESAJ GÖNDER BUTONU =============
+    async function handleSend() {
+      if (isSending) return;
+      const input = document.getElementById("userInput");
+      const sendBtn = document.getElementById("sendBtn");
+      const sendLabel = document.getElementById("sendLabel");
+
+      const text = input.value.trim();
+      if (!text) return;
+
+      let conv = getCurrentConversation();
+      if (!conv) {
+        createConversation(text.slice(0, 24));
+        conv = getCurrentConversation();
+      }
+
+      if (conv.title === "Yeni sohbet") {
+        conv.title = text.slice(0, 40);
+      }
+
+      conv.messages.push({
+        role: "user",
+        content: text,
+        time: formatTime(),
+      });
+
+      renderConversations();
+      renderMessages();
+      input.value = "";
+
+      // loading durumu
+      isSending = true;
+      sendBtn.disabled = true;
+      sendLabel.textContent = "Bekle";
+
+      // geçici "yazıyor" balonu
+      const convBefore = conv;
+      convBefore.messages.push({
+        role: "assistant",
+        content: "Yazıyor...",
+        time: "",
+        _temp: true, // geçici bayrak
+      });
+      renderMessages();
+
+      try {
+        const replyText = await sendToBackend(text);
+
+        // geçici balonu sil
+        convBefore.messages = convBefore.messages.filter((m) => !m._temp);
+
+        convBefore.messages.push({
+          role: "assistant",
+          content: replyText,
+          time: formatTime(),
+        });
+        renderMessages();
+      } catch (err) {
+        console.error(err);
+        convBefore.messages = convBefore.messages.filter((m) => !m._temp);
+        convBefore.messages.push({
+          role: "assistant",
+          content: "Bir hata oluştu: " + err.message,
+          time: formatTime(),
+        });
+        renderMessages();
+      } finally {
+        isSending = false;
+        sendBtn.disabled = false;
+        sendLabel.textContent = "Gönder";
+      }
+    }
+
+    // Enter ile gönder / Shift+Enter ile satır
+    const userInput = document.getElementById("userInput");
+    userInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        handleSend();
+      }
+    });
+
+    document.getElementById("sendBtn").onclick = handleSend;
+    document.getElementById("newChatBtn").onclick = () =>
+      createConversation("Yeni sohbet");
+
+    // ================== TEMA ============================
+    const themeToggle = document.getElementById("themeToggle");
+    const themeDot = document.getElementById("themeDot");
+    const themeLabel = document.getElementById("themeLabel");
+
+    function syncThemeLabel() {
+      const isDark = document.body.getAttribute("data-theme") === "dark";
+      themeDot.textContent = isDark ? "🌙" : "☀";
+      themeLabel.textContent = isDark ? "Gece modu" : "Gündüz modu";
+    }
+
+    themeToggle.onclick = () => {
+      const current = document.body.getAttribute("data-theme");
+      const next = current === "dark" ? "light" : "dark";
+      document.body.setAttribute("data-theme", next);
+      syncThemeLabel();
+    };
+
+    // ilk sohbet
+    createConversation("Yeni sohbet");
+    syncThemeLabel();
+  </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="tr">
+<head>
 <meta charset="UTF-8">
 <title>MorAI Chat</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
