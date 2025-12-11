@@ -1,4 +1,4 @@
-// API/chat.js — Gemini 1.5 Flash, temiz + Türkçe hata mesajlı
+// API/chat.js — Gemini 1.5 Flash *DOĞRU MODEL* + düzgün hata mesajı
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -23,9 +23,9 @@ export default async function handler(req, res) {
         .json({ reply: "Hata: Sunucuda GEMINI_API_KEY tanımlı değil." });
     }
 
-    // Daha yaygın model: gemini-1.5-flash
+    // 🔥 DOĞRU MODEL BURADA
     const url =
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent";
 
     const geminiResponse = await fetch(url, {
       method: "POST",
@@ -50,7 +50,6 @@ export default async function handler(req, res) {
       // JSON değilse ham metni kullanacağız
     }
 
-    // Normal cevap çıkarmayı dene
     let replyText = "";
 
     if (data && data.candidates && data.candidates[0]?.content?.parts) {
@@ -60,23 +59,15 @@ export default async function handler(req, res) {
         .trim();
     }
 
-    // Hata durumları için daha okunur mesaj
     if (!replyText) {
       if (data && data.error) {
         const code = data.error.code;
         const msg = data.error.message || "";
-        if (code === 503) {
-          replyText =
-            "Gemini modeli şu an çok yoğun ve geçici olarak kullanılamıyor. " +
-            "Biraz bekleyip tekrar dene.\n\nSunucu mesajı: " +
-            msg;
-        } else {
-          replyText =
-            "Gemini bir hata döndürdü (kod: " +
-            code +
-            "): " +
-            msg;
-        }
+        replyText =
+          "Gemini bir hata döndürdü (kod: " +
+          code +
+          "): " +
+          msg;
       } else {
         replyText =
           "Gemini'den beklenen metin gelmedi. Ham yanıt:\n\n" + rawText;
