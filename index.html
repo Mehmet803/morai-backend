@@ -528,14 +528,16 @@
               <button class="quick" data-q="Bana 5 maddede üretkenlik önerisi ver">Üretkenlik</button>
               <button class="quick" data-q="Bu hafta için bir okuma listesi öner">Okuma listesi</button>
             </div>
-          </div>
         </div>
+      </div>
       </section>
 
       <section class="composer">
         <div class="composer-inner">
                     <button class="icon-btn" id="attachBtn" title="Dosya / fotoğraf ekle">📎</button>
-          <input id="fileInput" type="file" multiple accept="image/*" hidden />                     <textarea id="input" class="text" placeholder="Mesaj yaz..."></textarea>
+          <input id="fileInput" type="file" multiple accept="image/*" hidden /> 
+
+                    <textarea id="input" class="text" placeholder="Mesaj yaz..."></textarea>
 
                     <button class="send" id="sendBtn">
             Gönder <span style="opacity:.9">➤</span>
@@ -554,8 +556,8 @@
   // =========================
   // Config
   // =========================
-  const BACKEND_URL = "/api/chat"; // Sunucunuzun chat endpoint'i
-  const MEMORY_DEPTH = 12; // Sohbet hafızasında tutulacak son mesaj sayısı (kullanıcı + AI)
+  const BACKEND_URL = "/api/chat"; 
+  const MEMORY_DEPTH = 12; // Sohbet hafızasında tutulacak son mesaj sayısı
 
   // =========================
   // Storage Keys
@@ -566,15 +568,22 @@
   // =========================
   // State
   // =========================
-  let chats = safeParse(localStorage.getItem(LS_CHATS), []);
+  let chats = getChatsFromStorage();
   let currentId = chats[0]?.id || null;
   let sending = false;
+  let pendingAttachments = [];
 
   // =========================
   // Helpers (Yardımcı Fonksiyonlar)
   // =========================
   function safeParse(str, fallback){
     try { return str ? JSON.parse(str) : fallback; } catch { return fallback; }
+  }
+  function getChatsFromStorage() {
+    let stored = safeParse(localStorage.getItem(LS_CHATS), []);
+    // Basit bir kontrol ekleyelim: messages dizisi olmayan eski sohbetleri temizle.
+    stored = stored.filter(c => Array.isArray(c.messages));
+    return stored;
   }
   function save(){
     localStorage.setItem(LS_CHATS, JSON.stringify(chats));
@@ -703,7 +712,7 @@
 
       const meta = document.createElement("div");
       meta.className = "chat-meta";
-      const count = chat.messages?.filter(m => m.role !== "system").length || 0; // Sadece user/ai mesajlarını say
+      const count = chat.messages?.filter(m => m.role === "user" || m.role === "ai").length || 0;
       meta.textContent = count ? `${count}` : "";
 
       const menuWrap = document.createElement("div");
@@ -742,12 +751,11 @@
     const wrap = document.getElementById("messages");
     const empty = document.getElementById("emptyState");
 
-    // önce eski mesajları temizle (emptyState kalacak)
+    // Sadece UI mesajlarını sil
     [...wrap.querySelectorAll(".row")].forEach(n => n.remove());
 
     const chat = byId(currentId);
-    // Sadece user/ai/typing mesajlarını gösteriyoruz. Sistem notlarını (eklendi gibi) gizle.
-    const msgs = (chat?.messages || []).filter(m => m.role !== "system"); 
+    const msgs = (chat?.messages || []).filter(m => m.role !== "system"); // sistem notlarını gizle
 
     // Empty state
     if(msgs.length === 0){
@@ -781,7 +789,6 @@
           const att = document.createElement("div");
           att.className = "att";
           
-          // Base64 verisi varsa (Sadece görsellerde olur)
           if(a.kind === "image" && a.dataUrl){
             att.innerHTML = `<div>🖼️ <b>${escapeHtml(a.name || "Görsel")}</b> <small>${a.sizeText || ""}</small></div>`;
             const img = document.createElement("img");
@@ -791,7 +798,6 @@
             attBox.appendChild(att);
             attBox.appendChild(img);
           } else {
-            // Diğer dosyalar
             att.innerHTML = `📎 <b>${escapeHtml(a.name)}</b> <small>${a.sizeText || ""}</small>`;
             attBox.appendChild(att);
           }
@@ -841,9 +847,7 @@
     });
   });
 
-  // Attachments (stored for next send)
-  let pendingAttachments = [];
-
+  // Attachments Handler
   document.getElementById("attachBtn").addEventListener("click", ()=>{
     document.getElementById("fileInput").click();
   });
@@ -856,29 +860,27 @@
     for(const f of files){
       const sizeText = formatBytes(f.size);
       if(f.type && f.type.startsWith("image/")){
-        // Görsel ise Base64'e çevir
         const dataUrl = await fileToDataUrl(f);
         newAttachments.push({ kind:"image", name:f.name, sizeText, dataUrl, mimeType: f.type });
       } else {
-        // Diğer dosyalar (sadece meta verisi, API'ye gönderilmeyecek)
+        // Şimdilik sadece görselleri işliyoruz, diğer dosyaları sadece not alıyoruz.
         newAttachments.push({ kind:"file", name:f.name, sizeText });
       }
     }
     
-    // Sadece Base64 içeriği olanları (görselleri) pending listesine ekle
+    // Base64 kodlu görselleri bekleyen listeye ekle
     pendingAttachments.push(...newAttachments.filter(a => a.kind === "image"));
 
-    // Kullanıcıya eklenenleri gösteren sistem notu
+    // Kullanıcıya gösterilecek sistem notu:
     const chat = byId(currentId);
     chat.messages.push({
-      role:"system", // Bu rol, renderMessages'ta gösterilmeyecek.
+      role:"system", 
       content:`Ek eklendi (${newAttachments.length}): ` + newAttachments.map(x=>x.name).join(", "),
       attachments: newAttachments
     });
     save();
     renderAll();
 
-    // reset input
     e.target.value = "";
   });
 
@@ -892,7 +894,6 @@
 
     const text = inputEl.value.trim();
     
-    // Eğer ne metin ne de bekleyen Base64 görseli varsa gönderme
     if(!text && pendingAttachments.length === 0) return;
 
     ensureChat();
@@ -926,12 +927,11 @@
     inputEl.value = "";
     charInfo.textContent = "0";
 
-    // 2. API Payload'unu Hazırlama (Hafıza + Yeni Mesaj)
+    // 2. API PAYLOAD'UNU HAZIRLAMA (Hafıza + Yeni Mesaj)
     
     // a) Anlık Mesajın 'parts' Dizisi (Mevcut metin + Base64 Ekler)
     const newParts = [];
 
-    // Görsel Base64 verilerini ekle (InlineData)
     pendingAttachments.forEach(att => {
       if(att.kind === "image" && att.dataUrl){
         const base64Data = att.dataUrl.split(",")[1];
@@ -948,19 +948,17 @@
       }
     });
 
-    // Mesaj metnini parts'a ekle
     if (text) {
       newParts.push({ text: text });
     }
     
     // b) Sohbet Hafızasını Oluşturma (History)
     const historyPayload = [];
-
-    // Son X mesajı al (güncel mesaj hariç) ve filtrele
+    // Son X (12) mesajı al (güncel mesaj hariç) ve filtrele
     const msgsForHistory = chat.messages
-                           .slice(0, chat.messages.length - 1) // Son mesajı (yeni eklenen userMsg) hariç tut
-                           .filter(m => m.role === "user" || m.role === "ai") // Sadece user/ai mesajlarını al
-                           .slice(-MEMORY_DEPTH); // Son X (12) mesajı al
+                           .slice(0, chat.messages.length - 1) 
+                           .filter(m => m.role === "user" || m.role === "ai") 
+                           .slice(-MEMORY_DEPTH); 
 
     msgsForHistory.forEach(m => {
       const partsForAPI = [];
@@ -987,7 +985,6 @@
         }
       });
 
-      // Eğer mesajın API'ye gönderilecek bir parçası varsa ekle
       if (partsForAPI.length > 0) {
         historyPayload.push({
           role: m.role,
@@ -1004,6 +1001,7 @@
         const res = await fetch(BACKEND_URL, {
             method:"POST",
             headers:{ "Content-Type":"application/json" },
+            // Backend artık 'parts' (yeni mesaj) ve 'history' (geçmiş) bekliyor:
             body: JSON.stringify({ parts: newParts, history: historyPayload }) 
         });
 
@@ -1016,7 +1014,7 @@
         // Yanıtı kaydet
         const reply = (data && typeof data.reply === "string" && data.reply.trim()) 
                   ? data.reply 
-                  : (data.error ? data.detail : "Valla reis bu sefer boş düştü 😅");
+                  : (data.error ? data.detail : "Valla reis, bağlantı gitti. Tekrar deneyelim. 😅");
 
         chat.messages.push({ role:"ai", content: reply });
 
