@@ -1,488 +1,300 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <title>MorAI Chat (Gemini)</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MorAI</title>
 
-  <style>
+<style>
     :root {
-      --bg: #020617;
-      --bg-elevated: #020617;
-      --border-subtle: #1f2937;
-      --accent: #22c55e;
-      --accent-soft: #052e16;
-      --text-main: #e5e7eb;
-      --text-muted: #9ca3af;
-      --user-bubble: #0f766e;
-      --bot-bubble: #020617;
-      --scrollbar: #4b5563;
+        --bg: #f5f5f5;
+        --text: #222;
+        --bubble-user: #007bff;
+        --bubble-ai: #e6e6e6;
+        --left-bg: #ffffff;
     }
-
-    * { box-sizing: border-box; }
+    .dark {
+        --bg: #0f0f0f;
+        --text: #ffffff;
+        --bubble-user: #008cff;
+        --bubble-ai: #1c1c1c;
+        --left-bg: #111;
+    }
 
     body {
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-        sans-serif;
-      background: radial-gradient(circle at top, #111827 0, #020617 45%, #000 100%);
-      color: var(--text-main);
-      height: 100vh;
-      overflow: hidden;
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        display: flex;
+        height: 100vh;
+        overflow: hidden;
     }
 
-    .app {
-      display: flex;
-      height: 100vh;
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-
-    /* SIDEBAR */
+    /* SOL PANEL */
     .sidebar {
-      width: 260px;
-      border-right: 1px solid var(--border-subtle);
-      background: linear-gradient(to bottom, #020617, #020617);
-      display: flex;
-      flex-direction: column;
-      padding: 10px;
-      gap: 10px;
+        width: 260px;
+        background: var(--left-bg);
+        border-right: 1px solid #3333;
+        display: flex;
+        flex-direction: column;
+        padding: 15px;
     }
-
-    .sidebar-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .logo-text {
-      font-size: 17px;
-      font-weight: 700;
-    }
-
-    .badge {
-      font-size: 11px;
-      padding: 3px 7px;
-      border-radius: 999px;
-      background: var(--accent);
-      color: #020617;
-    }
-
+    .sidebar h2 { margin: 0 0 10px 0; }
     .new-chat-btn {
-      width: 100%;
-      padding: 8px 10px;
-      margin-top: 6px;
-      border-radius: 999px;
-      border: 1px solid var(--border-subtle);
-      background: #020617;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      cursor: pointer;
+        padding: 10px;
+        background: #00875a;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-bottom: 12px;
+    }
+    .chat-list {
+        flex: 1;
+        overflow-y: auto;
+    }
+    .chat-item {
+        background: #007bff22;
+        padding: 10px;
+        border-radius: 6px;
+        margin-bottom: 6px;
+        cursor: pointer;
+    }
+    .chat-item:hover { background: #007bff33; }
+
+    .delete-btn {
+        margin-top: 10px;
+        padding: 8px;
+        background: #ff4444;
+        text-align: center;
+        color: #fff;
+        border-radius: 5px;
+        cursor: pointer;
     }
 
-    .new-chat-btn span.icon {
-      width: 18px;
-      height: 18px;
-      border-radius: 999px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--accent);
-      color: #020617;
-      font-size: 13px;
+    /* DARK MODE BUTTON */
+    .mode-btn {
+        margin-top: 10px;
+        padding: 8px;
+        background: #444;
+        text-align: center;
+        color: #fff;
+        border-radius: 5px;
+        cursor: pointer;
     }
 
-    .conversation-list {
-      flex: 1;
-      overflow-y: auto;
-      padding: 4px;
+    /* ANA CHAT ALANI */
+    .chat-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
     }
-
-    .conversation-list::-webkit-scrollbar { width: 6px; }
-    .conversation-list::-webkit-scrollbar-thumb {
-      background: var(--scrollbar);
-      border-radius: 999px;
-    }
-
-    .conv-item {
-      padding: 8px 9px;
-      border-radius: 8px;
-      margin-bottom: 4px;
-      font-size: 13px;
-      color: var(--text-main);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: background 0.15s ease, transform 0.05s ease;
-    }
-
-    .conv-item:hover {
-      background: #111827;
-      transform: translateY(-1px);
-    }
-
-    .conv-item.active {
-      background: var(--accent);
-      color: #020617;
-    }
-
-    .conv-title {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      flex: 1;
-    }
-
-    .sidebar-footer {
-      border-top: 1px solid var(--border-subtle);
-      padding: 8px 4px 4px;
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-
-    .theme-toggle {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 7px 9px;
-      border-radius: 999px;
-      border: 1px solid var(--border-subtle);
-      background: #020617;
-      cursor: pointer;
-      font-size: 12px;
-      color: var(--text-main);
-    }
-
-    /* CHAT */
-    .chat {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .chat-header {
-      height: 56px;
-      padding: 10px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid var(--border-subtle);
-      background: #1f2937;
-      color: #e5e7eb;
-    }
-
-    .chat-header-title span.main {
-      font-weight: 600;
-      font-size: 15px;
-    }
-
-    .chat-header-title span.sub {
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-
     .messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px 22px 14px;
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
     }
-
-    .messages::-webkit-scrollbar { width: 6px; }
-    .messages::-webkit-scrollbar-thumb {
-      background: var(--scrollbar);
-      border-radius: 999px;
-    }
-
-    .message-row {
-      display: flex;
-      margin-bottom: 12px;
-    }
-
-    .message-row.user { justify-content: flex-end; }
-
     .bubble {
-      max-width: 70%;
-      padding: 10px 12px;
-      border-radius: 12px;
-      font-size: 14px;
-      line-height: 1.4;
-      white-space: pre-wrap;
-      word-wrap: break-word;
+        max-width: 70%;
+        padding: 12px 14px;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        white-space: pre-line;
     }
+    .user { background: var(--bubble-user); color: white; margin-left: auto; }
+    .ai { background: var(--bubble-ai); color: var(--text); margin-right: auto; }
 
-    .user-bubble {
-      background: var(--user-bubble);
-      color: #e5e7eb;
+    /* GİRİŞ ALANI */
+    .input-area {
+        padding: 15px;
+        display: flex;
+        gap: 10px;
+        border-top: 1px solid #4444;
     }
-
-    .bot-bubble {
-      background: var(--bot-bubble);
-      border: 1px solid var(--border-subtle);
+    input {
+        flex: 1;
+        padding: 12px;
+        font-size: 16px;
+        border-radius: 8px;
+        border: 1px solid #666;
+        background: var(--left-bg);
+        color: var(--text);
     }
-
-    .chat-input-bar {
-      padding: 10px 14px 12px;
-      border-top: 1px solid var(--border-subtle);
-      display: flex;
-      gap: 8px;
-      align-items: flex-end;
-      background: #020617;
+    button.send-btn {
+        padding: 12px 18px;
+        background: #00875a;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
     }
-
-    .input-wrapper {
-      flex: 1;
-      border-radius: 12px;
-      border: 1px solid var(--border-subtle);
-      background: #020617;
-      padding: 6px 10px;
-      display: flex;
-      align-items: flex-end;
-      gap: 8px;
-    }
-
-    textarea {
-      border: none;
-      outline: none;
-      resize: none;
-      width: 100%;
-      max-height: 130px;
-      min-height: 22px;
-      background: transparent;
-      color: var(--text-main);
-      font-size: 14px;
-      line-height: 1.4;
-    }
-
-    .send-btn {
-      border-radius: 999px;
-      border: none;
-      background: #22c55e;
-      color: #020617;
-      padding: 8px 13px;
-      cursor: pointer;
-      font-size: 13px;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .send-btn:disabled {
-      opacity: 0.5;
-      cursor: default;
-    }
-
-    @media (max-width: 900px) {
-      .sidebar { display: none; }
-    }
-  </style>
+</style>
 </head>
 
-<body>
-  <div class="app">
-    <!-- SOL: SOHBETLER -->
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <div class="logo-text">Sohbetler</div>
-        <span class="badge">Gemini bağlı</span>
-      </div>
-      <button class="new-chat-btn" id="newChatBtn">
-        <span class="icon">+</span>
-        <span>Yeni sohbet</span>
-      </button>
+<body class="dark">
 
-      <div id="conversationList" class="conversation-list"></div>
+<!-- SOL PANEL -->
+<div class="sidebar">
+    <h2>Sohbetler</h2>
+    <div class="new-chat-btn" onclick="newChat()">+ Yeni Sohbet</div>
 
-      <div class="sidebar-footer">
-        <button class="theme-toggle" id="themeToggle">
-          🌙 / ☀️  <span id="themeLabel">Gece modu</span>
-        </button>
-      </div>
-    </aside>
+    <div class="chat-list" id="chatList"></div>
 
-    <!-- SAĞ: CHAT -->
-    <main class="chat">
-      <header class="chat-header">
-        <div class="chat-header-title">
-          <span class="main" id="chatTitle">Yeni sohbet</span>
-          <span class="sub">Enter: gönder • Shift+Enter: satır atla</span>
-        </div>
-      </header>
+    <div class="delete-btn" onclick="deleteChat()">Sohbeti Sil</div>
+    <div class="mode-btn" onclick="toggleMode()">🌙 / ☀️ Mod Değiştir</div>
+</div>
 
-      <section id="messages" class="messages"></section>
+<!-- CHAT ANA PANEL -->
+<div class="chat-container">
+    <div class="messages" id="messages"></div>
 
-      <footer class="chat-input-bar">
-        <div class="input-wrapper">
-          <textarea
-            id="userInput"
-            placeholder="Mesaj yaz..."
-          ></textarea>
-          <button class="send-btn" id="sendBtn">
-            <span id="sendLabel">Gönder</span> ➤
-          </button>
-        </div>
-      </footer>
-    </main>
-  </div>
+    <div class="input-area">
+        <input id="msgInput" placeholder="Mesaj yaz..." onkeydown="if(event.key==='Enter'){sendMessage()}">
+        <button class="send-btn" onclick="sendMessage()">Gönder</button>
+    </div>
+</div>
 
-  <script>
-    // Backend endpoint: Vercel'de API/chat.js → /api/chat
-    const BACKEND_URL = "/api/chat";
+<script>
+/* ==============================
+   GLOBAL DEĞİŞKENLER
+================================= */
+let chats = JSON.parse(localStorage.getItem("morai_chats") || "[]");
+let currentChat = null;
 
-    let conversations = [];
-    let currentId = null;
-    let isSending = false;
+/* ==============================
+   MODE / TEMA
+================================= */
+function toggleMode() {
+    document.body.classList.toggle("dark");
+    localStorage.setItem("morai_mode", document.body.classList.contains("dark") ? "dark" : "light");
+}
 
-    function createConversation(title) {
-      const id = Date.now().toString();
-      const conv = { id, title, messages: [] };
-      conversations.unshift(conv);
-      currentId = id;
-      renderConversations();
-      renderMessages();
-    }
+(function loadMode() {
+    const mode = localStorage.getItem("morai_mode");
+    if (mode === "light") document.body.classList.remove("dark");
+})();
 
-    function getCurrentConversation() {
-      return conversations.find((c) => c.id === currentId) || null;
-    }
-
-    function renderConversations() {
-      const list = document.getElementById("conversationList");
-      list.innerHTML = "";
-      conversations.forEach((conv) => {
-        const div = document.createElement("div");
-        div.className =
-          "conv-item" + (conv.id === currentId ? " active" : "");
-        div.onclick = () => {
-          currentId = conv.id;
-          renderConversations();
-          renderMessages();
-        };
-        const title = document.createElement("div");
-        title.className = "conv-title";
-        title.textContent = conv.title;
-        div.appendChild(title);
+/* ==============================
+   SOHBET YÖNETİMİ
+================================= */
+function renderChatList() {
+    let list = document.getElementById("chatList");
+    list.innerHTML = "";
+    chats.forEach((c, i) => {
+        let div = document.createElement("div");
+        div.className = "chat-item";
+        div.textContent = c.title || "Yeni Sohbet";
+        div.onclick = () => loadChat(i);
         list.appendChild(div);
-      });
-    }
-
-    function renderMessages() {
-      const area = document.getElementById("messages");
-      area.innerHTML = "";
-      const conv = getCurrentConversation();
-      if (!conv) return;
-      document.getElementById("chatTitle").textContent = conv.title;
-
-      conv.messages.forEach((m) => {
-        const row = document.createElement("div");
-        row.className = "message-row " + (m.role === "user" ? "user" : "bot");
-        const bubble = document.createElement("div");
-        bubble.className =
-          "bubble " + (m.role === "user" ? "user-bubble" : "bot-bubble");
-        bubble.textContent = m.content;
-        row.appendChild(bubble);
-        area.appendChild(row);
-      });
-
-      area.scrollTop = area.scrollHeight;
-    }
-
-    async function sendMessage() {
-      if (isSending) return;
-      const input = document.getElementById("userInput");
-      const sendBtn = document.getElementById("sendBtn");
-      const sendLabel = document.getElementById("sendLabel");
-      const text = input.value.trim();
-      if (!text) return;
-
-      let conv = getCurrentConversation();
-      if (!conv) {
-        createConversation(text.slice(0, 24));
-        conv = getCurrentConversation();
-      }
-      if (conv.title === "Yeni sohbet") {
-        conv.title = text.slice(0, 40);
-      }
-
-      conv.messages.push({ role: "user", content: text });
-      renderConversations();
-      renderMessages();
-      input.value = "";
-
-      isSending = true;
-      sendBtn.disabled = true;
-      sendLabel.textContent = "Bekle";
-
-      // geçici "yazıyor"
-      conv.messages.push({ role: "assistant", content: "Yazıyor..." });
-      renderMessages();
-
-      try {
-        const res = await fetch(BACKEND_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: text }),
-        });
-
-        const data = await res.json();
-        // Yazıyor balonunu sil
-        conv.messages.pop();
-
-        let content;
-        if (!res.ok) {
-          // Backend hata döndü → error mesajını göster
-          content =
-            "Sunucu hatası (" +
-            res.status +
-            "): " +
-            (data.error || JSON.stringify(data));
-        } else {
-          // Normal durumda reply alanına bak; yoksa ham JSON’u göster
-          content =
-            (typeof data.reply === "string" && data.reply.trim() !== "")
-              ? data.reply
-              : "Gemini ham yanıtı:\n\n" + JSON.stringify(data, null, 2);
-        }
-
-        conv.messages.push({ role: "assistant", content });
-        renderMessages();
-      } catch (err) {
-        conv.messages.pop();
-        conv.messages.push({
-          role: "assistant",
-          content: "İstek hatası: " + err.message,
-        });
-        renderMessages();
-      } finally {
-        isSending = false;
-        sendBtn.disabled = false;
-        sendLabel.textContent = "Gönder";
-      }
-    }
-
-    // Enter = gönder, Shift+Enter = satır
-    const userInput = document.getElementById("userInput");
-    userInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
-      }
     });
-    document.getElementById("sendBtn").onclick = sendMessage;
-    document.getElementById("newChatBtn").onclick = () =>
-      createConversation("Yeni sohbet");
+}
 
-    // “tema” sadece buton yazısını değiştiriyor (tasarım zaten dark)
-    document.getElementById("themeToggle").onclick = () => {
-      const label = document.getElementById("themeLabel");
-      label.textContent =
-        label.textContent === "Gece modu" ? "Gündüz modu" : "Gece modu";
-    };
+function newChat() {
+    const chat = { title: "Yeni Sohbet", messages: [] };
+    chats.push(chat);
+    currentChat = chats.length - 1;
+    saveChats();
+    renderChatList();
+    renderMessages();
+}
 
-    createConversation("Yeni sohbet");
-  </script>
+function saveChats() {
+    localStorage.setItem("morai_chats", JSON.stringify(chats));
+}
+
+function loadChat(i) {
+    currentChat = i;
+    renderMessages();
+}
+
+function deleteChat() {
+    if (currentChat == null) return alert("Sohbet seçili değil.");
+    chats.splice(currentChat, 1);
+    currentChat = null;
+    saveChats();
+    renderChatList();
+    renderMessages();
+}
+
+/* ==============================
+   MESAJ GÖRÜNTÜLEME
+================================= */
+function renderMessages() {
+    const box = document.getElementById("messages");
+    box.innerHTML = "";
+
+    if (currentChat == null) return;
+
+    chats[currentChat].messages.forEach(msg => {
+        const div = document.createElement("div");
+        div.className = "bubble " + msg.role;
+        div.textContent = msg.content;
+        box.appendChild(div);
+    });
+
+    box.scrollTop = box.scrollHeight;
+}
+
+/* ==============================
+   YAZMA ANİMASYONU
+================================= */
+function typingBubble(show=true) {
+    const box = document.getElementById("messages");
+
+    if (show) {
+        const div = document.createElement("div");
+        div.className = "bubble ai";
+        div.id = "typing";
+        div.textContent = "Yazıyor...";
+        box.appendChild(div);
+    } else {
+        const t = document.getElementById("typing");
+        if (t) t.remove();
+    }
+
+    box.scrollTop = box.scrollHeight;
+}
+
+/* ==============================
+   MESAJ GÖNDERME
+================================= */
+async function sendMessage() {
+    const input = document.getElementById("msgInput");
+    let text = input.value.trim();
+    if (!text) return;
+
+    if (currentChat == null) newChat();
+
+    chats[currentChat].messages.push({ role: "user", content: text });
+    saveChats();
+    renderMessages();
+    input.value = "";
+
+    typingBubble(true);
+
+    // BACKEND API ÇAĞRISI
+    const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text })
+    });
+    const data = await response.json();
+
+    typingBubble(false);
+
+    chats[currentChat].messages.push({ role: "ai", content: data.reply });
+    saveChats();
+    renderMessages();
+}
+
+/* ==============================
+   UYGULAMA BAŞLANGICI
+================================= */
+renderChatList();
+renderMessages();
+</script>
+
 </body>
 </html>
