@@ -1,54 +1,50 @@
 // morai-backend/api/chat.js
-// MorAI Sunucu Kodu: Görsel Analizi ve Sohbet Hafızası Desteği
+// MorAI Sunucu Kodu: GÖRSEL ANALİZİ ve SOHBET HAFIZASI Desteği
 
 export default async function handler(req, res) {
-  // Yalnızca POST isteklerine izin veriyoruz
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Sadece POST isteği kabul edilir." });
   }
 
   try {
-    // Frontend'den gelen verileri alıyoruz:
-    // parts: Şu anki kullanıcının mesajı ve varsa Base64 formatındaki ekleri.
-    // history: Önceki tüm konuşma geçmişi (API'nin anlayacağı formatta).
+    // Frontend'den gelen veriler: parts (yeni mesaj/ekler) ve history (geçmiş)
     const { parts, history } = req.body; 
 
-    // 1. API Anahtar Kontrolü
+    // API Anahtar Kontrolü
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       return res.status(500).json({ error: "GEMINI_API_KEY (Ortam değişkeni) eksik." });
     }
 
-    // 2. Sistem Prompt'u (MorAI Kişiliği)
-    // Bu, yapay zekaya nasıl konuşması gerektiğini söyler.
+    // Sistem Prompt'u (MorAI Kişiliği)
     const systemPrompt = `
-Sen MorAI'sin.
+Sen MorAI'sin. 
 Rahat konuşursun.
 "reis", "kanka" gibi samimi hitaplar kullanırsın.
 Uzatmazsın, net konuşursun.
 Türkçe cevap verirsin.
 Gereksiz resmiyet yok.
 `;
-    // Sistem kişiliğini API'nin anlayacağı parçaya dönüştürüyoruz.
     const systemPart = { text: systemPrompt };
 
-    // 3. Konuşma İçeriğini (Payload) Oluşturma
+    // Konuşma İçeriğini (Payload) Oluşturma
+    // Bu dizi, API'ye gönderilecek tüm mesajları (geçmiş + mevcut) içerir.
     let contentsPayload = [];
 
-    // Önceki Konuşma Geçmişi (Hafıza)
+    // 1. Önceki Konuşma Geçmişini (Hafıza) ekle
     if (history && history.length > 0) {
-        // Gelen geçmişi (history) olduğu gibi payload'a ekliyoruz.
+        // Geçmişteki her mesajı (user/model) olduğu gibi ekliyoruz.
         contentsPayload = [...history]; 
     }
 
-    // Mevcut Kullanıcı Mesajını Ekleme
-    // Sistem kişiliği (systemPart) ve anlık kullanıcı mesajı/ekleri tek bir 'contents' öğesinde birleştirilir.
+    // 2. Mevcut Kullanıcı Mesajını Ekleme
+    // Sistem kişiliği ve anlık kullanıcı mesajı/ekleri tek bir 'contents' öğesinde birleştirilir.
     contentsPayload.push({
         role: "user",
-        parts: [systemPart, ...parts]
+        parts: [systemPart, ...parts] // Yeni mesaj parçaları
     });
 
-    // 4. API İsteğini Gönderme
+    // 3. API İsteğini Gönderme
     const response = await fetch(
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + apiKey,
       {
@@ -57,7 +53,7 @@ Gereksiz resmiyet yok.
         body: JSON.stringify({
           contents: contentsPayload,
           config: {
-            temperature: 0.7 // Cevapların biraz daha tutarlı olması için.
+            temperature: 0.7 
           }
         }),
       }
@@ -77,7 +73,7 @@ Gereksiz resmiyet yok.
     // Yanıtı alma ve temizleme
     const reply =
       data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "Valla reis, bir hata oldu galiba. Ne olduğunu tam anlayamadım. Tekrar dener misin? 😅";
+      "Valla reis, bir hata oldu galiba. Tekrar dener misin? 😅";
 
     res.status(200).json({ reply });
   } catch (err) {
