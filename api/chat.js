@@ -11,16 +11,17 @@ export default async function handler(req, res) {
     try {
       if (err) return res.status(400).json({ error: "Form parse error", detail: String(err) });
 
-      // formidable bazen alanları array döndürür
-      const messageRaw = fields.message;
-      const message = Array.isArray(messageRaw) ? messageRaw[0] : messageRaw;
-
       const apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) return res.status(500).json({ error: "GEMINI_API_KEY eksik (Vercel env)" });
+      if (!apiKey) return res.status(500).json({ error: "GEMINI_API_KEY eksik" });
 
-      // Not: Bu endpoint video/mp4 görmez. Sadece metin işler.
+      const messageRaw = fields.message;
+      const message = Array.isArray(messageRaw) ? messageRaw[0] : (messageRaw || "");
+
+      // Log amaçlı: gelen dosya var mı?
+      const incomingFiles = files.files || files.file || files.upload || null;
+
       const payload = {
-        contents: [{ parts: [{ text: message || "" }] }]
+        contents: [{ parts: [{ text: message }] }]
       };
 
       const url =
@@ -35,25 +36,29 @@ export default async function handler(req, res) {
 
       const j = await r.json();
 
-      // Gemini error döndürürse aynen göster
       if (!r.ok) {
         return res.status(r.status).json({
           error: "Gemini error",
           status: r.status,
-          detail: j?.error || j,
+          detail: j,
+          debug_received_files: incomingFiles ? true : false
         });
       }
 
-      const reply = j?.candidates?.[0]?.content?.parts?.map(p => p.text).filter(Boolean).join("\n") || "";
+      const reply =
+        j?.candidates?.[0]?.content?.parts?.map(p => p.text).filter(Boolean).join("\n") || "";
 
+      // Burada artık "Boş yanıt"ı direkt debug ile döndürüyoruz
       if (!reply) {
         return res.status(200).json({
-          reply: "Gemini boş döndü. (Muhtemelen kota/rate limit/model erişimi) — detay için console/log.",
-          raw: j
+          reply: "",
+          warning: "Gemini reply boş döndü",
+          raw: j,
+          debug_received_files: incomingFiles ? true : false
         });
       }
 
-      return res.status(200).json({ reply });
+      return res.status(200).json({ reply, debug_received_files: incomingFiles ? true : false });
     } catch (e) {
       return res.status(500).json({ error: "Server crash", detail: String(e?.message || e) });
     }
