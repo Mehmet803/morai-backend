@@ -79,3 +79,40 @@ export default async function handler(req, res) {
     });
   }
 }
+import formidable from "formidable";
+import fs from "fs";
+
+export const config = {
+  api: { bodyParser: false }
+};
+
+export default async function handler(req, res){
+  const form = formidable({ multiples:true });
+
+  form.parse(req, async (err, fields, files)=>{
+    if(err) return res.status(500).json({error:"Form parse error"});
+
+    const message = fields.message || "";
+    const apiKey = process.env.GEMINI_API_KEY;
+
+    const payload = {
+      contents: [{
+        parts: [{ text: message }]
+      }]
+    };
+
+    const r = await fetch(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+apiKey,
+      {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify(payload)
+      }
+    );
+
+    const j = await r.json();
+    const reply = j.candidates?.[0]?.content?.parts?.[0]?.text || "Boş yanıt";
+
+    res.json({ reply });
+  });
+}
