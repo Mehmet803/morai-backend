@@ -7,149 +7,260 @@
 
 <style>
 :root{
-  --bg:#0f1115; --panel:#16181d; --border:#262a33;
-  --text:#e5e7eb; --muted:#9ca3af;
-  --user:#2563eb; --ai:#1f2937;
+  --bg:#0f1115;
+  --panel:#16181d;
+  --border:#262a33;
+  --text:#e5e7eb;
+  --muted:#9ca3af;
+  --user:#2563eb;
+  --ai:#1f2937;
 }
 *{box-sizing:border-box}
-body{margin:0;font-family:system-ui;background:var(--bg);color:var(--text);height:100vh;display:flex}
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto;
+  background:var(--bg);
+  color:var(--text);
+  height:100vh;
+  display:flex;
+}
 
-/* Sidebar */
-.sidebar{width:280px;background:var(--panel);border-right:1px solid var(--border);padding:14px;display:flex;flex-direction:column}
-.brand{font-weight:700;font-size:18px;margin-bottom:10px}
-.new{background:#2563eb;color:#fff;border:none;padding:10px;border-radius:8px;cursor:pointer}
-.list{flex:1;margin-top:12px;overflow:auto}
-.item{padding:8px 10px;border-radius:8px;display:flex;justify-content:space-between;cursor:pointer}
-.item.active{background:#2563eb22}
-.menu{background:none;border:none;color:var(--muted);font-size:18px}
+/* SIDEBAR */
+.sidebar{
+  width:280px;
+  background:var(--panel);
+  border-right:1px solid var(--border);
+  padding:14px;
+  display:flex;
+  flex-direction:column;
+}
+.brand{
+  font-weight:700;
+  font-size:18px;
+  margin-bottom:12px;
+}
+.new-chat{
+  background:#2563eb;
+  color:#fff;
+  border:none;
+  padding:10px;
+  border-radius:8px;
+  cursor:pointer;
+}
+.chat-list{
+  flex:1;
+  margin-top:12px;
+  overflow:auto;
+}
+.chat-item{
+  padding:8px 10px;
+  border-radius:8px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  cursor:pointer;
+}
+.chat-item.active{
+  background:#2563eb22;
+}
+.chat-item:hover{
+  background:#2563eb11;
+}
+.menu-btn{
+  background:none;
+  border:none;
+  color:var(--muted);
+  font-size:18px;
+  cursor:pointer;
+}
 
-/* Main */
-.main{flex:1;display:flex;flex-direction:column}
-.top{height:50px;border-bottom:1px solid var(--border);padding:0 16px;display:flex;align-items:center}
-.messages{flex:1;padding:20px;overflow:auto;position:relative}
-.empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);text-align:center}
-.row{display:flex;margin-bottom:12px}
+/* MAIN */
+.main{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+}
+.topbar{
+  height:50px;
+  border-bottom:1px solid var(--border);
+  padding:0 16px;
+  display:flex;
+  align-items:center;
+}
+.messages{
+  flex:1;
+  padding:20px;
+  overflow:auto;
+}
+.empty{
+  color:var(--muted);
+  text-align:center;
+  margin-top:40px;
+}
+.row{
+  display:flex;
+  margin-bottom:12px;
+}
 .row.user{justify-content:flex-end}
-.bubble{max-width:70%;padding:12px 14px;border-radius:14px;font-size:14px}
-.user .bubble{background:var(--user);color:#fff}
-.ai .bubble{background:var(--ai);color:var(--text)}
+.bubble{
+  max-width:70%;
+  padding:12px 14px;
+  border-radius:14px;
+  font-size:14px;
+  line-height:1.4;
+}
+.user .bubble{
+  background:var(--user);
+  color:#fff;
+}
+.ai .bubble{
+  background:var(--ai);
+  color:var(--text);
+}
 
-.typing{opacity:.7}
-
-.composer{border-top:1px solid var(--border);padding:12px;display:flex;gap:8px;background:var(--panel)}
-textarea{flex:1;resize:none;border:1px solid var(--border);border-radius:10px;padding:10px;background:#0b0d11;color:var(--text)}
-.send{background:#22c55e;border:none;border-radius:10px;padding:0 16px;color:#000;font-weight:600}
-.attach{background:none;border:none;font-size:20px;color:var(--muted)}
+/* INPUT */
+.composer{
+  border-top:1px solid var(--border);
+  padding:12px;
+  display:flex;
+  gap:8px;
+  background:var(--panel);
+}
+textarea{
+  flex:1;
+  resize:none;
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:10px;
+  background:#0b0d11;
+  color:var(--text);
+  font-family:inherit;
+}
+.send{
+  background:#22c55e;
+  color:#000;
+  border:none;
+  border-radius:10px;
+  padding:0 18px;
+  font-weight:600;
+  cursor:pointer;
+}
 </style>
 </head>
 
 <body>
 <div class="sidebar">
   <div class="brand">MorAI</div>
-  <button class="new" onclick="newChat()">+ Yeni sohbet</button>
-  <div class="list" id="list"></div>
+  <button class="new-chat" onclick="newChat()">+ Yeni sohbet</button>
+  <div class="chat-list" id="chatList"></div>
 </div>
 
 <div class="main">
-  <div class="top" id="title">Yeni sohbet</div>
-  <div class="messages" id="msgs">
-    <div class="empty" id="empty">Nereden başlayalım reis?<br>Mesaj yaz veya dosya at.</div>
+  <div class="topbar" id="chatTitle">Yeni sohbet</div>
+  <div class="messages" id="messages">
+    <div class="empty" id="empty">Nereden başlayalım reis?</div>
   </div>
 
   <div class="composer">
-    <button class="attach" onclick="file.click()">📎</button>
-    <input type="file" id="file" hidden>
-    <textarea id="input" placeholder="Yaz bakalım reis…"></textarea>
+    <textarea id="input" rows="1" placeholder="Yaz bakalım reis…"></textarea>
     <button class="send" onclick="send()">Gönder</button>
   </div>
 </div>
 
 <script>
-const chats = JSON.parse(localStorage.getItem("morai")||"[]");
+const chats = JSON.parse(localStorage.getItem("morai_chats") || "[]");
 let current = 0;
-let fileText = "";
 
-const list=document.getElementById("list");
-const msgs=document.getElementById("msgs");
-const empty=document.getElementById("empty");
-const input=document.getElementById("input");
-const title=document.getElementById("title");
-const file=document.getElementById("file");
+const chatList = document.getElementById("chatList");
+const messagesEl = document.getElementById("messages");
+const input = document.getElementById("input");
+const empty = document.getElementById("empty");
+const chatTitle = document.getElementById("chatTitle");
 
-function save(){localStorage.setItem("morai",JSON.stringify(chats))}
+function save(){
+  localStorage.setItem("morai_chats", JSON.stringify(chats));
+}
 
 function newChat(){
-  chats.unshift({title:"Yeni sohbet",messages:[]});
-  current=0;save();render();
+  chats.unshift({ title:"Yeni sohbet", messages:[] });
+  current = 0;
+  save();
+  render();
+}
+
+function deleteChat(e,i){
+  e.stopPropagation();
+  chats.splice(i,1);
+  current = 0;
+  save();
+  render();
 }
 
 function render(){
-  list.innerHTML="";
+  chatList.innerHTML = "";
   chats.forEach((c,i)=>{
-    const d=document.createElement("div");
-    d.className="item"+(i===current?" active":"");
-    d.innerHTML=`<span>${c.title}</span><button class="menu" onclick="del(event,${i})">⋯</button>`;
-    d.onclick=()=>{current=i;render()};
-    list.appendChild(d);
+    const d = document.createElement("div");
+    d.className = "chat-item" + (i===current?" active":"");
+    d.innerHTML = `
+      <span>${c.title}</span>
+      <button class="menu-btn" onclick="deleteChat(event,${i})">⋯</button>
+    `;
+    d.onclick = ()=>{ current=i; render(); };
+    chatList.appendChild(d);
   });
-  renderMsgs();
+  renderMessages();
 }
 
-function del(e,i){e.stopPropagation();chats.splice(i,1);current=0;save();render()}
+function renderMessages(){
+  messagesEl.querySelectorAll(".row").forEach(r=>r.remove());
+  const msgs = chats[current]?.messages || [];
+  empty.style.display = msgs.length ? "none" : "block";
+  chatTitle.textContent = chats[current]?.title || "Yeni sohbet";
 
-function renderMsgs(){
-  msgs.querySelectorAll(".row").forEach(r=>r.remove());
-  const m=chats[current]?.messages||[];
-  empty.style.display=m.length?"none":"flex";
-  title.textContent=chats[current]?.title||"Yeni sohbet";
-
-  m.forEach(x=>{
-    const r=document.createElement("div");
-    r.className="row "+x.role;
-    const b=document.createElement("div");
-    b.className="bubble"+(x.typing?" typing":"");
-    b.textContent=x.text;
-    r.appendChild(b);
-    msgs.appendChild(r);
+  msgs.forEach(m=>{
+    const row = document.createElement("div");
+    row.className = "row " + m.role;
+    const bubble = document.createElement("div");
+    bubble.className = "bubble";
+    bubble.textContent = m.text;
+    row.appendChild(bubble);
+    messagesEl.appendChild(row);
   });
-  msgs.scrollTop=msgs.scrollHeight;
-}
-
-file.onchange=async()=>{
-  const f=file.files[0];
-  if(!f) return;
-  if(f.name.endsWith(".txt")||f.name.endsWith(".md")){
-    fileText=await f.text();
-    alert("Dosyayı aldım reis 👍 Şimdi sorabilirsin.");
-  }else{
-    alert("PDF şimdilik yok reis. TXT atarsan okurum.");
-  }
-  file.value="";
+  messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
 async function send(){
-  const text=input.value.trim();
-  if(!text && !fileText) return;
+  const text = input.value.trim();
+  if(!text) return;
   if(!chats.length) newChat();
 
-  const chat=chats[current];
-  chat.messages.push({role:"user",text});
-  chat.messages.push({role:"ai",text:"Yazıyorum reis…",typing:true});
-  save();render();
-  input.value="";
+  const chat = chats[current];
+  chat.messages.push({ role:"user", text });
+  if(chat.title === "Yeni sohbet") chat.title = text.slice(0,30);
+  save(); render();
+  input.value = "";
 
-  const res=await fetch("/api/chat",{
+  const res = await fetch("/api/chat",{
     method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({message:text, file:fileText})
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ message:text })
   });
-  const data=await res.json();
+  const data = await res.json();
 
-  chat.messages.pop();
-  chat.messages.push({role:"ai",text:data.reply});
-  fileText="";
-  save();render();
+  chat.messages.push({
+    role:"ai",
+    text: data.reply || "Valla reis cevap gelmedi 😅"
+  });
+  save(); render();
 }
+
+/* ENTER = GÖNDER, SHIFT+ENTER = ALT SATIR */
+input.addEventListener("keydown", e=>{
+  if(e.key === "Enter" && !e.shiftKey){
+    e.preventDefault();
+    send();
+  }
+});
 
 render();
 </script>
