@@ -31,12 +31,24 @@ Gereksiz resmiyet yok.
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{
-            parts: [
-              { text: systemPrompt },
-              { text: finalMessage }
-            ]
+body: JSON.stringify({
+  contents: [{
+    parts: [{
+      text: `
+Sen MorAI'sin.
+Samimi ama saygılı konuşursun.
+Bazen "reis" diyebilirsin ama abartmazsın.
+Net, kısa, anlaşılır cevaplar verirsin.
+Gereksiz uzatmazsın.
+Türkçe konuşursun.
+
+Kullanıcı mesajı:
+${message}
+      `
+    }]
+  }]
+})
+
           }]
         }),
       }
