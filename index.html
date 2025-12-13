@@ -25,7 +25,7 @@ body{
   display:flex;
 }
 
-/* SIDEBAR */
+/* Sidebar */
 .sidebar{
   width:280px;
   background:var(--panel);
@@ -74,7 +74,7 @@ body{
   cursor:pointer;
 }
 
-/* MAIN */
+/* Main */
 .main{
   flex:1;
   display:flex;
@@ -118,7 +118,7 @@ body{
   color:var(--text);
 }
 
-/* INPUT */
+/* Input */
 .composer{
   border-top:1px solid var(--border);
   padding:12px;
@@ -158,11 +158,11 @@ textarea{
 <div class="main">
   <div class="topbar" id="chatTitle">Yeni sohbet</div>
   <div class="messages" id="messages">
-    <div class="empty" id="empty">Nereden başlayalım reis?</div>
+    <div class="empty" id="empty">Nereden başlayalım?</div>
   </div>
 
   <div class="composer">
-    <textarea id="input" rows="1" placeholder="Yaz bakalım reis…"></textarea>
+    <textarea id="input" rows="1" placeholder="Mesaj yaz…"></textarea>
     <button class="send" onclick="send()">Gönder</button>
   </div>
 </div>
@@ -249,12 +249,12 @@ async function send(){
 
   chat.messages.push({
     role:"ai",
-    text: data.reply || "Valla reis cevap gelmedi 😅"
+    text: data.reply || "Cevap alınamadı"
   });
   save(); render();
 }
 
-/* ENTER = GÖNDER, SHIFT+ENTER = ALT SATIR */
+/* ENTER = gönder, SHIFT+ENTER = alt satır */
 input.addEventListener("keydown", e=>{
   if(e.key === "Enter" && !e.shiftKey){
     e.preventDefault();
@@ -266,3 +266,4 @@ render();
 </script>
 </body>
 </html>
+
