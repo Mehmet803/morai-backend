@@ -1,83 +1,61 @@
-// morai-backend/api/chat.js
-// MorAI Sunucu Kodu: GÖRSEL ANALİZİ ve SOHBET HAFIZASI Desteği
+import formidable from "formidable";
+
+export const config = { api: { bodyParser: false } };
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Sadece POST isteği kabul edilir." });
-  }
+  if (req.method !== "POST") return res.status(405).json({ error: "Only POST" });
 
-  try {
-    // Frontend'den gelen veriler: parts (yeni mesaj/ekler) ve history (geçmiş)
-    const { parts, history } = req.body; 
+  const form = formidable({ multiples: true });
 
-    // API Anahtar Kontrolü
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      return res.status(500).json({ error: "GEMINI_API_KEY (Ortam değişkeni) eksik." });
-    }
+  form.parse(req, async (err, fields, files) => {
+    try {
+      if (err) return res.status(400).json({ error: "Form parse error", detail: String(err) });
 
-    // Sistem Prompt'u (MorAI Kişiliği)
-    const systemPrompt = `
-Sen MorAI'sin. 
-Rahat konuşursun.
-"reis", "kanka" gibi samimi hitaplar kullanırsın.
-Uzatmazsın, net konuşursun.
-Türkçe cevap verirsin.
-Gereksiz resmiyet yok.
-`;
-    const systemPart = { text: systemPrompt };
+      // formidable bazen alanları array döndürür
+      const messageRaw = fields.message;
+      const message = Array.isArray(messageRaw) ? messageRaw[0] : messageRaw;
 
-    // Konuşma İçeriğini (Payload) Oluşturma
-    // Bu dizi, API'ye gönderilecek tüm mesajları (geçmiş + mevcut) içerir.
-    let contentsPayload = [];
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) return res.status(500).json({ error: "GEMINI_API_KEY eksik (Vercel env)" });
 
-    // 1. Önceki Konuşma Geçmişini (Hafıza) ekle
-    if (history && history.length > 0) {
-        // Geçmişteki her mesajı (user/model) olduğu gibi ekliyoruz.
-        contentsPayload = [...history]; 
-    }
+      // Not: Bu endpoint video/mp4 görmez. Sadece metin işler.
+      const payload = {
+        contents: [{ parts: [{ text: message || "" }] }]
+      };
 
-    // 2. Mevcut Kullanıcı Mesajını Ekleme
-    // Sistem kişiliği ve anlık kullanıcı mesajı/ekleri tek bir 'contents' öğesinde birleştirilir.
-    contentsPayload.push({
-        role: "user",
-        parts: [systemPart, ...parts] // Yeni mesaj parçaları
-    });
+      const url =
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" +
+        apiKey;
 
-    // 3. API İsteğini Gönderme
-    const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + apiKey,
-      {
+      const r = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: contentsPayload,
-          config: {
-            temperature: 0.7 
-          }
-        }),
-      }
-    );
+        body: JSON.stringify(payload),
+      });
 
-    const data = await response.json();
-    
-    // API'den hata döndü mü kontrol et
-    if (data.error) {
-        console.error("Gemini API Error:", data.error);
-        return res.status(data.error.code || 500).json({ 
-            error: "Gemini API'den hata döndü.", 
-            detail: data.error.message 
+      const j = await r.json();
+
+      // Gemini error döndürürse aynen göster
+      if (!r.ok) {
+        return res.status(r.status).json({
+          error: "Gemini error",
+          status: r.status,
+          detail: j?.error || j,
         });
+      }
+
+      const reply = j?.candidates?.[0]?.content?.parts?.map(p => p.text).filter(Boolean).join("\n") || "";
+
+      if (!reply) {
+        return res.status(200).json({
+          reply: "Gemini boş döndü. (Muhtemelen kota/rate limit/model erişimi) — detay için console/log.",
+          raw: j
+        });
+      }
+
+      return res.status(200).json({ reply });
+    } catch (e) {
+      return res.status(500).json({ error: "Server crash", detail: String(e?.message || e) });
     }
-
-    // Yanıtı alma ve temizleme
-    const reply =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "Valla reis, bir hata oldu galiba. Tekrar dener misin? 😅";
-
-    res.status(200).json({ reply });
-  } catch (err) {
-    console.error("Server error:", err);
-    res.status(500).json({ error: "Sunucu tarafında bilinmeyen hata", detail: String(err) });
-  }
+  });
 }
