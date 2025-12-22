@@ -21,10 +21,20 @@ Türkçe cevap verirsin.
 Gereksiz resmiyet yok.
 `;
 
-    let finalMessage = message || "";
-    if (file) {
-      finalMessage += "\n\n--- DOSYA İÇERİĞİ ---\n" + file;
-    }
+body: JSON.stringify({
+  contents: [
+    {
+      role: "user",
+      parts: [{ text: systemPrompt }]
+    },
+    ...messages.map(m => ({
+      role: m.role,
+      parts: [{ text: m.content }]
+    }))
+  ]
+})
+
+
 
     const response = await fetch(
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" +
