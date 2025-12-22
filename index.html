@@ -869,6 +869,84 @@
   // Sending
   // =========================
   async function sendMessage(){
+  if(sending) return;
+
+  const text = inputEl.value.trim();
+  if(!text && pendingAttachments.length === 0) return;
+
+  ensureChat();
+  const chat = byId(currentId);
+
+  if(chat.title === "Yeni sohbet" && text){
+    chat.title = text.slice(0, 32);
+  }
+
+  // Kullanıcı mesajı
+  chat.messages.push({
+    role: "user",
+    content: text
+  });
+
+  // typing ekle
+  const typing = { role: "ai", type: "typing", content: "" };
+  chat.messages.push(typing);
+
+  sending = true;
+  sendBtn.disabled = true;
+  setStatus("Gönderiliyor…");
+  save();
+  renderAll();
+
+  inputEl.value = "";
+  charInfo.textContent = "0";
+
+  // 🔥 HAFIZA (SON 10 MESAJ)
+  const history = chat.messages
+    .filter(m => m.role !== "typing")
+    .slice(-10)
+    .map(m => ({
+      role: m.role === "ai" ? "model" : "user",
+      content: m.content
+    }));
+
+  try {
+    const res = await fetch(BACKEND_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        messages: history
+      })
+    });
+
+    const data = await res.json();
+
+    chat.messages.pop(); // typing sil
+    chat.messages.push({
+      role: "ai",
+      content: data.reply || "Cevap gelmedi reis 😅"
+    });
+
+    setStatus("Hazır");
+    save();
+    renderAll();
+
+  } catch (err) {
+    chat.messages.pop();
+    chat.messages.push({
+      role: "ai",
+      content: "Sunucu hatası: " + err.message
+    });
+
+    setStatus("Hata");
+    save();
+    renderAll();
+
+  } finally {
+    sending = false;
+    sendBtn.disabled = false;
+  }
+}
+
     if(sending) return;
 
     const text = inputEl.value.trim();
