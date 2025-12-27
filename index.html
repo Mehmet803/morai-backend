@@ -2,89 +2,59 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>MorAI</title>
 
 <style>
+/* ====== SENİN İLK ATTIGIN UI (AYNI) ====== */
 :root{
-  --bg:#f6f7fb;
-  --panel:#ffffff;
-  --panel2:#f9fafb;
-  --border:#e5e7eb;
-  --text:#0f172a;
-  --muted:#6b7280;
-  --accent:#10b981;
-  --accentSoft:#d1fae5;
-  --bubbleUser:#10b981;
-  --bubbleAI:#eef2f7;
+  --bg:#f6f7fb;--panel:#ffffff;--panel2:#f9fafb;--border:#e5e7eb;
+  --text:#0f172a;--muted:#6b7280;--accent:#10b981;--accentSoft:#d1fae5;
+  --bubbleUser:#10b981;--bubbleAI:#eef2f7;
 }
 body.dark{
-  --bg:#020617;
-  --panel:#020617;
-  --panel2:#0b1220;
-  --border:#1f2937;
-  --text:#e5e7eb;
-  --muted:#9ca3af;
-  --accent:#22c55e;
-  --accentSoft:#052e16;
-  --bubbleUser:#16a34a;
-  --bubbleAI:#0b1220;
+  --bg:#020617;--panel:#020617;--panel2:#0b1220;--border:#1f2937;
+  --text:#e5e7eb;--muted:#9ca3af;--accent:#22c55e;--accentSoft:#052e16;
+  --bubbleUser:#16a34a;--bubbleAI:#0b1220;
 }
 *{box-sizing:border-box}
 body{
-  margin:0;
-  font-family:system-ui,Arial;
-  background:var(--bg);
-  color:var(--text);
-  height:100vh;
-  display:flex;
-  overflow:hidden;
+  margin:0;font-family:system-ui,Arial;
+  background:
+    radial-gradient(900px 500px at 15% 0%, rgba(16,185,129,.16), transparent 60%),
+    radial-gradient(900px 500px at 85% 10%, rgba(56,189,248,.12), transparent 60%),
+    var(--bg);
+  color:var(--text);height:100vh;display:flex;overflow:hidden;
 }
 .app{display:flex;width:100%;max-width:1400px;margin:0 auto}
 
 /* Sidebar */
 .sidebar{
-  width:280px;
-  background:linear-gradient(to bottom,var(--panel),var(--panel2));
-  border-right:1px solid var(--border);
-  padding:12px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
+  width:290px;background:linear-gradient(to bottom,var(--panel),var(--panel2));
+  border-right:1px solid var(--border);padding:14px;
+  display:flex;flex-direction:column;gap:12px;
 }
 .brand{display:flex;justify-content:space-between;align-items:center}
-.brand-left{display:flex;gap:8px;align-items:center}
-.logo{width:26px;height:26px;border-radius:50%;background:#22c55e}
+.brand-left{display:flex;gap:10px;align-items:center}
+.logo{width:28px;height:28px;border-radius:50%;background:#22c55e}
+.pill{font-size:11px;padding:4px 8px;border-radius:999px;
+  background:var(--accentSoft);color:var(--accent)}
 .btn{
-  border:none;
-  background:var(--accent);
-  color:#fff;
-  font-weight:700;
-  border-radius:8px;
-  padding:8px;
-  cursor:pointer;
+  background:var(--accent);border:none;color:#fff;font-weight:700;
+  border-radius:10px;padding:10px;cursor:pointer;
 }
-.tools{display:flex;gap:6px}
+.tools{display:flex;gap:8px}
 .tool{
-  flex:1;
-  background:transparent;
-  border:1px solid var(--border);
-  color:var(--text);
-  border-radius:999px;
-  padding:6px;
-  cursor:pointer;
+  flex:1;border:1px solid var(--border);background:var(--panel);
+  border-radius:999px;padding:8px;cursor:pointer;
 }
 .chatlist{
-  flex:1;
-  border:1px solid var(--border);
-  border-radius:10px;
-  overflow:auto;
+  flex:1;overflow:auto;border:1px solid var(--border);
+  border-radius:12px;padding:6px;
 }
 .chat-item{
-  display:flex;
-  justify-content:space-between;
-  padding:8px;
-  cursor:pointer;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:8px;border-radius:8px;cursor:pointer;
 }
 .chat-item.active{background:var(--accentSoft)}
 .menu{display:none}
@@ -93,69 +63,36 @@ body{
 /* Main */
 .main{flex:1;display:flex;flex-direction:column}
 .topbar{
-  height:50px;
-  border-bottom:1px solid var(--border);
-  padding:10px;
-  display:flex;
-  justify-content:space-between;
+  height:56px;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;padding:0 18px;
 }
-.messages{
-  flex:1;
-  overflow:auto;
-  padding:16px;
-  position:relative;
-}
+.messages{flex:1;overflow:auto;padding:18px;position:relative}
 .empty{
-  position:absolute;
-  inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center
 }
 .empty-card{
-  padding:20px;
-  border:1px solid var(--border);
-  border-radius:12px;
-  background:var(--panel);
+  padding:18px;border:1px solid var(--border);
+  border-radius:16px;background:var(--panel)
 }
 .row{display:flex;margin-bottom:10px}
 .row.user{justify-content:flex-end}
 .bubble{
-  max-width:70%;
-  padding:10px 12px;
-  border-radius:14px;
-  white-space:pre-wrap;
+  max-width:72%;padding:11px 13px;border-radius:16px;
+  white-space:pre-wrap;line-height:1.45
 }
-.bubble.user{
-  background:var(--bubbleUser);
-  color:#ecfdf5;
-}
-.bubble.ai{
-  background:var(--bubbleAI);
-}
+.bubble.user{background:var(--bubbleUser);color:#ecfdf5}
+.bubble.ai{background:var(--bubbleAI)}
 
-/* Composer */
 .composer{
-  border-top:1px solid var(--border);
-  padding:10px;
+  border-top:1px solid var(--border);padding:12px
 }
-.composer-inner{
-  display:flex;
-  gap:8px;
-}
+.composer-inner{display:flex;gap:10px}
 textarea{
-  flex:1;
-  resize:none;
-  padding:8px;
+  flex:1;resize:none;padding:10px;font-size:14px
 }
 .send{
-  background:var(--accent);
-  border:none;
-  color:#fff;
-  font-weight:700;
-  padding:8px 14px;
-  border-radius:8px;
-  cursor:pointer;
+  background:var(--accent);border:none;color:#fff;
+  font-weight:700;border-radius:10px;padding:10px 14px;cursor:pointer
 }
 </style>
 </head>
@@ -166,13 +103,12 @@ textarea{
 <aside class="sidebar">
   <div class="brand">
     <div class="brand-left">
-      <div class="logo"></div>
-      <b>MorAI</b>
+      <div class="logo"></div><b>MorAI</b>
     </div>
-    <span>Gemini</span>
+    <div class="pill">Gemini</div>
   </div>
 
-  <button class="btn" id="newChat">+ Yeni Sohbet</button>
+  <button class="btn" id="newChat">+ Yeni sohbet</button>
 
   <div class="tools">
     <button class="tool" id="themeBtn">🌙 / ☀️</button>
@@ -183,33 +119,36 @@ textarea{
 </aside>
 
 <main class="main">
-  <div class="topbar">
-    <div id="chatTitle">Yeni sohbet</div>
-    <div>Hazır</div>
-  </div>
+  <header class="topbar">
+    <div>
+      <b id="chatTitle">Yeni sohbet</b><br/>
+      <small>Enter: gönder • Shift+Enter: satır</small>
+    </div>
+    <small>Hazır</small>
+  </header>
 
-  <div class="messages" id="messages">
+  <section class="messages" id="messages">
     <div class="empty" id="empty">
       <div class="empty-card">
-        <b>Nereden başlayalım?</b><br/>
-        Bir mesaj yaz reis.
+        <b>Nereden başlayalım?</b><br/>Bir mesaj yaz reis.
       </div>
     </div>
-  </div>
+  </section>
 
-  <div class="composer">
+  <section class="composer">
     <div class="composer-inner">
       <textarea id="input" placeholder="Mesaj yaz..."></textarea>
       <button class="send" id="send">Gönder</button>
     </div>
-  </div>
+  </section>
 </main>
 
 </div>
 
 <script>
+/* ====== HAFIZA + DAVRANIŞ (DÜZGÜN) ====== */
 const API="/api/chat";
-const LS="morai_full_v1";
+const LS="morai_final_memory";
 let chats=JSON.parse(localStorage.getItem(LS)||"[]");
 let current=0;
 
@@ -223,8 +162,7 @@ function renderChats(){
   chats.forEach((c,i)=>{
     const d=document.createElement("div");
     d.className="chat-item"+(i===current?" active":"");
-    d.innerHTML=`<span>${c.title}</span>
-      <span class="menu" onclick="delChat(${i})">⋯</span>`;
+    d.innerHTML=`<span>${c.title}</span><span class="menu" onclick="delChat(${i})">⋯</span>`;
     d.onclick=()=>{current=i;render();}
     list.appendChild(d);
   });
@@ -234,7 +172,7 @@ function render(){
   renderChats();
   const box=document.getElementById("messages");
   const empty=document.getElementById("empty");
-  box.querySelectorAll(".row").forEach(x=>x.remove());
+  box.querySelectorAll(".row").forEach(n=>n.remove());
   const chat=chats[current];
   document.getElementById("chatTitle").textContent=chat.title;
   if(chat.messages.length===0){empty.style.display="flex";return;}
@@ -245,8 +183,7 @@ function render(){
     const b=document.createElement("div");
     b.className="bubble "+m.role;
     b.textContent=m.content;
-    r.appendChild(b);
-    box.appendChild(r);
+    r.appendChild(b);box.appendChild(r);
   });
   box.scrollTop=box.scrollHeight;
 }
@@ -258,10 +195,11 @@ async function send(){
   const chat=chats[current];
   if(chat.title==="Yeni sohbet") chat.title=text.slice(0,32);
   chat.messages.push({role:"user",content:text});
-  input.value="";
-  render();
+  input.value="";render();
 
-  const history=chat.messages.slice(-10);
+  /* 🔥 HAFIZA: SADECE USER + AI, SON 10 */
+  const history=chat.messages.filter(m=>m.role==="user"||m.role==="ai").slice(-10);
+
   const r=await fetch(API,{
     method:"POST",
     headers:{"Content-Type":"application/json"},
@@ -269,16 +207,13 @@ async function send(){
   });
   const j=await r.json();
   chat.messages.push({role:"ai",content:j.reply});
-  save();
-  render();
+  save();render();
 }
 
 function delChat(i){
   chats.splice(i,1);
   if(!chats.length) chats.push({title:"Yeni sohbet",messages:[]});
-  current=0;
-  save();
-  render();
+  current=0;save();render();
 }
 
 document.getElementById("send").onclick=send;
@@ -287,8 +222,7 @@ document.getElementById("input").onkeydown=e=>{
 };
 document.getElementById("newChat").onclick=()=>{
   chats.unshift({title:"Yeni sohbet",messages:[]});
-  current=0;
-  save();render();
+  current=0;save();render();
 };
 document.getElementById("themeBtn").onclick=()=>{
   document.body.classList.toggle("dark");
