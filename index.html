@@ -200,7 +200,6 @@
       font-size:11px;
       white-space:nowrap;
     }
-
     .menu-wrap{ position:relative; }
     .menu-btn{
       border:none;
@@ -385,7 +384,6 @@
       border:1px solid rgba(148,163,184,.25);
       display:block;
     }
-
     /* Typing */
     .typing{
       display:inline-flex;
@@ -557,144 +555,316 @@
       </section>
     </main>
   </div>
-
 <script>
-/* =========================
-   BASIC STATE & HELPERS
-========================= */
-const BACKEND_URL = "https://morai-backend-prerggkzt-mehmets-projects-5ba929d4.vercel.app/api/chat";
+  // =========================
+  // Config
+  // =========================
+  const BACKEND_URL = "/api/chat"; // backend'in buna uyuyor
 
-const LS_CHATS = "morai_chats_v2";
-let chats = JSON.parse(localStorage.getItem(LS_CHATS) || "[]");
-let currentId = chats[0]?.id || null;
-let sending = false;
+  // =========================
+  // Storage Keys
+  // =========================
+  const LS_CHATS = "morai_chats_v2";
+  const LS_THEME = "morai_theme_v2";
 
-function uid(){
-  return Math.random().toString(16).slice(2) + Date.now();
-}
-function save(){
-  localStorage.setItem(LS_CHATS, JSON.stringify(chats));
-}
-function byId(id){
-  return chats.find(c => c.id === id);
-}
+  // =========================
+  // State
+  // =========================
+  let chats = safeParse(localStorage.getItem(LS_CHATS), []);
+  let currentId = chats[0]?.id || null;
+  let sending = false;
 
-/* =========================
-   CHAT SETUP
-========================= */
-function ensureChat(){
-  if(!chats.length){
-    const id = uid();
-    chats = [{ id, title:"Yeni sohbet", messages: [] }];
-    currentId = id;
-    save();
+  // =========================
+  // Helpers
+  // =========================
+  function safeParse(str, fallback){
+    try { return str ? JSON.parse(str) : fallback; } catch { return fallback; }
   }
-}
-function newChat(){
-  const id = uid();
-  chats.unshift({ id, title:"Yeni sohbet", messages: [] });
-  currentId = id;
-  save();
-  render();
-}
-
-/* =========================
-   RENDER
-========================= */
-function render(){
-  document.getElementById("chatTitle").textContent =
-    byId(currentId)?.title || "Yeni sohbet";
-
-  const wrap = document.getElementById("messages");
-  wrap.querySelectorAll(".row").forEach(n => n.remove());
-
-  const msgs = byId(currentId)?.messages || [];
-  msgs.forEach(m => {
-    const row = document.createElement("div");
-    row.className = "row " + (m.role === "user" ? "user" : "ai");
-
-    const bubble = document.createElement("div");
-    bubble.className = "bubble " + (m.role === "user" ? "user" : "ai");
-    bubble.textContent = m.content;
-
-    row.appendChild(bubble);
-    wrap.appendChild(row);
+  function save(){
+    localStorage.setItem(LS_CHATS, JSON.stringify(chats));
+  }
+  function uid(){
+    return Math.random().toString(16).slice(2) + "-" + Date.now().toString(16);
+  }
+  function byId(id){
+    return chats.find(c => c.id === id) || null;
+  }
+  function setStatus(text){
+    document.getElementById("statusText").textContent = text;
+  }
+  function closeAllMenus(){
+    document.querySelectorAll(".menu.open").forEach(m => m.classList.remove("open"));
+  }
+  document.addEventListener("click", (e)=>{
+    if(!e.target.closest(".menu-wrap")) closeAllMenus();
   });
 
-  wrap.scrollTop = wrap.scrollHeight;
-}
+  // =========================
+  // Theme
+  // =========================
+  function applyThemeFromStorage(){
+    const t = localStorage.getItem(LS_THEME);
+    if(t === "light") document.body.classList.remove("dark");
+    else document.body.classList.add("dark");
+  }
+  function toggleTheme(){
+    document.body.classList.toggle("dark");
+    localStorage.setItem(LS_THEME, document.body.classList.contains("dark") ? "dark" : "light");
+  }
 
-/* =========================
-   SEND MESSAGE (🔥 FIXED)
-========================= */
-async function sendMessage(){
-  if(sending) return;
+  // =========================
+  // Chat CRUD
+  // =========================
+  function ensureChat(){
+    if(!chats.length){
+      const id = uid();
+      chats = [{ id, title:"Yeni sohbet", createdAt: Date.now(), messages: [] }];
+      currentId = id;
+      save();
+    }
+    if(!currentId) currentId = chats[0].id;
+  }
 
-  const input = document.getElementById("input");
-  const text = input.value.trim();
-  if(!text) return;
+  function newChat(){
+    const id = uid();
+    chats.unshift({ id, title:"Yeni sohbet", createdAt: Date.now(), messages: [] });
+    currentId = id;
+    save();
+    renderAll();
+  }
 
+  function renameChat(id, title){
+    const c = byId(id);
+    if(!c) return;
+    c.title = title || "Yeni sohbet";
+    save();
+    renderChatList();
+    renderHeader();
+  }
+
+  function deleteChat(id){
+    const c = byId(id);
+    if(!c) return;
+    const ok = confirm(`"${c.title || "Bu sohbet"}" silinsin mi?`);
+    if(!ok) return;
+    chats = chats.filter(x => x.id !== id);
+    if(!chats.length){
+      currentId = null;
+      ensureChat();
+    } else {
+      currentId = chats[0].id;
+    }
+    save();
+    renderAll();
+  }
+
+  function clearAll(){
+    const ok = confirm("Tüm sohbetler silinsin mi?");
+    if(!ok) return;
+    chats = [];
+    currentId = null;
+    save();
+    ensureChat();
+    renderAll();
+  }
+
+  // =========================
+  // Rendering
+  // =========================
+  function renderHeader(){
+    const c = byId(currentId);
+    document.getElementById("chatTitle").textContent = c?.title || "Yeni sohbet";
+  }
+
+  function renderChatList(){
+    const list = document.getElementById("chatList");
+    list.innerHTML = "";
+
+    chats.forEach(chat => {
+      const item = document.createElement("div");
+      item.className = "chat-item" + (chat.id === currentId ? " active" : "");
+      item.onclick = () => { currentId = chat.id; renderAll(); };
+
+      const title = document.createElement("div");
+      title.className = "chat-title";
+      title.textContent = chat.title || "Yeni sohbet";
+
+      const meta = document.createElement("div");
+      meta.className = "chat-meta";
+      const count = chat.messages?.length || 0;
+      meta.textContent = count ? `${count}` : "";
+
+      const menuWrap = document.createElement("div");
+      menuWrap.className = "menu-wrap";
+
+      const btn = document.createElement("button");
+      btn.className = "menu-btn";
+      btn.textContent = "⋯";
+      btn.title = "Menü";
+      btn.onclick = (e) => {
+        e.stopPropagation();
+        closeAllMenus();
+        menu.classList.toggle("open");
+      };
+
+      const menu = document.createElement("div");
+      menu.className = "menu";
+
+      const del = document.createElement("div");
+      del.className = "menu-item danger";
+      del.innerHTML = `<span>Sil</span><span>🗑️</span>`;
+      del.onclick = (e) => { e.stopPropagation(); menu.classList.remove("open"); deleteChat(chat.id); };
+
+      menu.appendChild(del);
+      menuWrap.appendChild(btn);
+      menuWrap.appendChild(menu);
+
+      item.appendChild(title);
+      item.appendChild(meta);
+      item.appendChild(menuWrap);
+      list.appendChild(item);
+    });
+  }
+
+  function renderMessages(){
+    const wrap = document.getElementById("messages");
+    const empty = document.getElementById("emptyState");
+
+    [...wrap.querySelectorAll(".row")].forEach(n => n.remove());
+
+    const chat = byId(currentId);
+    const msgs = chat?.messages || [];
+
+    if(msgs.length === 0){
+      empty.style.display = "flex";
+    } else {
+      empty.style.display = "none";
+    }
+
+    msgs.forEach(m => {
+      const row = document.createElement("div");
+      row.className = "row " + (m.role === "user" ? "user" : "ai");
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble " + (m.role === "user" ? "user" : "ai");
+
+      if(m.type === "typing"){
+        bubble.innerHTML = `<span class="typing">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        </span>`;
+      } else {
+        bubble.textContent = m.content || "";
+      }
+
+      row.appendChild(bubble);
+      wrap.appendChild(row);
+    });
+
+    wrap.scrollTop = wrap.scrollHeight;
+  }
+
+  function renderAll(){
+    renderChatList();
+    renderHeader();
+    renderMessages();
+  }
+
+  // =========================
+  // Composer
+  // =========================
+  const inputEl = document.getElementById("input");
+  const sendBtn = document.getElementById("sendBtn");
+  const charInfo = document.getElementById("charInfo");
+
+  inputEl.addEventListener("input", ()=>{
+    charInfo.textContent = String(inputEl.value.length);
+  });
+
+  inputEl.addEventListener("keydown", (e)=>{
+    if(e.key === "Enter" && !e.shiftKey){
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
+  document.querySelectorAll(".quick").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const q = btn.getAttribute("data-q") || "";
+      inputEl.value = q;
+      charInfo.textContent = String(q.length);
+      inputEl.focus();
+    });
+  });
+
+  // =========================
+  // Sending
+  // =========================
+  async function sendMessage(){
+    if(sending) return;
+
+    const text = inputEl.value.trim();
+    if(!text) return;
+
+    ensureChat();
+    const chat = byId(currentId);
+
+    if(chat.title === "Yeni sohbet"){
+      chat.title = text.slice(0, 32);
+    }
+
+    chat.messages.push({ role:"user", content: text });
+    chat.messages.push({ role:"ai", type:"typing", content:"" });
+
+    sending = true;
+    sendBtn.disabled = true;
+    setStatus("Gönderiliyor…");
+    save();
+    renderAll();
+
+    inputEl.value = "";
+    charInfo.textContent = "0";
+
+    try{
+      const res = await fetch(BACKEND_URL, {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({ message: text })
+      });
+
+      const data = await res.json();
+
+      chat.messages.pop();
+      chat.messages.push({ role:"ai", content: data.reply || "Boş yanıt" });
+
+      setStatus("Hazır");
+      save();
+      renderAll();
+    } catch(err){
+      chat.messages.pop();
+      chat.messages.push({ role:"ai", content: "Sunucu hatası: " + String(err) });
+      setStatus("Hata");
+      save();
+      renderAll();
+    } finally{
+      sending = false;
+      sendBtn.disabled = false;
+    }
+  }
+
+  // =========================
+  // Wire buttons
+  // =========================
+  document.getElementById("newChatBtn").addEventListener("click", newChat);
+  document.getElementById("themeBtn").addEventListener("click", toggleTheme);
+  document.getElementById("clearAllBtn").addEventListener("click", clearAll);
+
+  // =========================
+  // Init
+  // =========================
+  applyThemeFromStorage();
   ensureChat();
-  const chat = byId(currentId);
-
-  if(chat.title === "Yeni sohbet"){
-    chat.title = text.slice(0, 32);
-  }
-
-  chat.messages.push({ role:"user", content:text });
-  sending = true;
-  input.value = "";
-  render();
-
-  const history = chat.messages.slice(-10).map(m => ({
-    role: m.role === "ai" ? "model" : "user",
-    content: m.content
-  }));
-
-  try{
-    const res = await fetch(BACKEND_URL, {
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ messages: history })
-    });
-
-    const data = await res.json();
-    chat.messages.push({
-      role:"ai",
-      content: data.reply || "Cevap gelmedi 😅"
-    });
-
-  } catch(e){
-    chat.messages.push({
-      role:"ai",
-      content:"Sunucu hatası: " + e.message
-    });
-  }
-
-  sending = false;
-  save();
-  render();
-}
-
-/* =========================
-   EVENTS
-========================= */
-document.getElementById("sendBtn").onclick = sendMessage;
-document.getElementById("newChatBtn").onclick = newChat;
-
-document.getElementById("input").addEventListener("keydown", e => {
-  if(e.key === "Enter" && !e.shiftKey){
-    e.preventDefault();
-    sendMessage();
-  }
-});
-
-/* =========================
-   INIT
-========================= */
-ensureChat();
-render();
+  renderAll();
+  setStatus("Hazır");
 </script>
-
 </body>
 </html>
