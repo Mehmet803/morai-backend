@@ -7,6 +7,18 @@
 
 <style>
 :root{
+  --bg:#f6f7fb;
+  --panel:#ffffff;
+  --panel2:#f9fafb;
+  --border:#e5e7eb;
+  --text:#0f172a;
+  --muted:#6b7280;
+  --accent:#10b981;
+  --accentSoft:#d1fae5;
+  --bubbleUser:#10b981;
+  --bubbleAI:#eef2f7;
+}
+body.dark{
   --bg:#020617;
   --panel:#020617;
   --panel2:#0b1220;
@@ -17,16 +29,12 @@
   --accentSoft:#052e16;
   --bubbleUser:#16a34a;
   --bubbleAI:#0b1220;
-  --shadow:0 10px 30px rgba(0,0,0,.45);
 }
 *{box-sizing:border-box}
 body{
   margin:0;
-  font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;
-  background:
-    radial-gradient(900px 500px at 15% 0%, rgba(16,185,129,.16), transparent 60%),
-    radial-gradient(900px 500px at 85% 10%, rgba(56,189,248,.12), transparent 60%),
-    var(--bg);
+  font-family:system-ui,Arial;
+  background:var(--bg);
   color:var(--text);
   height:100vh;
   display:flex;
@@ -36,155 +44,258 @@ body{
 
 /* Sidebar */
 .sidebar{
-  width:280px;background:linear-gradient(to bottom,var(--panel),var(--panel2));
-  border-right:1px solid var(--border);padding:14px;display:flex;flex-direction:column;gap:12px
+  width:280px;
+  background:linear-gradient(to bottom,var(--panel),var(--panel2));
+  border-right:1px solid var(--border);
+  padding:12px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
 }
-.brand{display:flex;align-items:center;justify-content:space-between}
-.brand-left{display:flex;gap:10px;align-items:center}
-.logo{width:28px;height:28px;border-radius:999px;background:radial-gradient(circle at 30% 30%, #a7f3d0,#22c55e);box-shadow:0 0 18px rgba(34,197,94,.55)}
-.pill{font-size:11px;padding:4px 8px;border-radius:999px;background:var(--accentSoft);color:var(--accent);border:1px solid rgba(34,197,94,.25)}
-.btn{border:none;background:var(--accent);color:#052e16;font-weight:700;border-radius:10px;padding:10px 12px;cursor:pointer}
-.chatlist{flex:1;border:1px solid var(--border);border-radius:12px;background:rgba(2,6,23,.35);padding:6px;overflow:auto}
+.brand{display:flex;justify-content:space-between;align-items:center}
+.brand-left{display:flex;gap:8px;align-items:center}
+.logo{width:26px;height:26px;border-radius:50%;background:#22c55e}
+.btn{
+  border:none;
+  background:var(--accent);
+  color:#fff;
+  font-weight:700;
+  border-radius:8px;
+  padding:8px;
+  cursor:pointer;
+}
+.tools{display:flex;gap:6px}
+.tool{
+  flex:1;
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--text);
+  border-radius:999px;
+  padding:6px;
+  cursor:pointer;
+}
+.chatlist{
+  flex:1;
+  border:1px solid var(--border);
+  border-radius:10px;
+  overflow:auto;
+}
+.chat-item{
+  display:flex;
+  justify-content:space-between;
+  padding:8px;
+  cursor:pointer;
+}
+.chat-item.active{background:var(--accentSoft)}
+.menu{display:none}
+.chat-item:hover .menu{display:block}
 
 /* Main */
 .main{flex:1;display:flex;flex-direction:column}
 .topbar{
-  height:56px;border-bottom:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;padding:0 18px;
-  background:rgba(2,6,23,.55);backdrop-filter:blur(10px)
+  height:50px;
+  border-bottom:1px solid var(--border);
+  padding:10px;
+  display:flex;
+  justify-content:space-between;
 }
-.topbar-title{font-weight:700;font-size:14px}
-.topbar-sub{font-size:11px;color:var(--muted)}
-.messages{flex:1;overflow:auto;padding:18px 20px}
-
-/* Bubbles */
+.messages{
+  flex:1;
+  overflow:auto;
+  padding:16px;
+  position:relative;
+}
+.empty{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.empty-card{
+  padding:20px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:var(--panel);
+}
 .row{display:flex;margin-bottom:10px}
 .row.user{justify-content:flex-end}
 .bubble{
-  max-width:72%;padding:11px 13px;border-radius:16px;
-  box-shadow:0 6px 18px rgba(0,0,0,.35);
-  white-space:pre-wrap;line-height:1.45
+  max-width:70%;
+  padding:10px 12px;
+  border-radius:14px;
+  white-space:pre-wrap;
 }
-.bubble.user{background:var(--bubbleUser);color:#ecfdf5;border-bottom-right-radius:6px}
-.bubble.ai{background:var(--bubbleAI);color:var(--text);border:1px solid rgba(148,163,184,.18);border-bottom-left-radius:6px}
+.bubble.user{
+  background:var(--bubbleUser);
+  color:#ecfdf5;
+}
+.bubble.ai{
+  background:var(--bubbleAI);
+}
 
 /* Composer */
 .composer{
-  border-top:1px solid var(--border);padding:12px 14px;
-  background:rgba(2,6,23,.65);backdrop-filter:blur(10px)
+  border-top:1px solid var(--border);
+  padding:10px;
 }
 .composer-inner{
-  display:flex;gap:10px;align-items:flex-end;
-  border:1px solid #334155;background:#020617;border-radius:14px;padding:10px
+  display:flex;
+  gap:8px;
 }
-.text{
-  flex:1;min-height:22px;max-height:140px;resize:none;border:none;outline:none;
-  background:transparent;color:var(--text);font-size:14px
+textarea{
+  flex:1;
+  resize:none;
+  padding:8px;
 }
-.send{border:none;background:var(--accent);color:#052e16;font-weight:800;padding:10px 14px;border-radius:12px;cursor:pointer}
-
-@media(max-width:900px){.sidebar{display:none}}
+.send{
+  background:var(--accent);
+  border:none;
+  color:#fff;
+  font-weight:700;
+  padding:8px 14px;
+  border-radius:8px;
+  cursor:pointer;
+}
 </style>
 </head>
 
-<body>
+<body class="dark">
 <div class="app">
 
-  <aside class="sidebar">
-    <div class="brand">
-      <div class="brand-left">
-        <div class="logo"></div>
-        <div>MorAI</div>
-      </div>
-      <div class="pill">Gemini</div>
+<aside class="sidebar">
+  <div class="brand">
+    <div class="brand-left">
+      <div class="logo"></div>
+      <b>MorAI</b>
     </div>
-    <button class="btn" id="newChatBtn">+ Yeni Sohbet</button>
-    <div class="chatlist"></div>
-  </aside>
+    <span>Gemini</span>
+  </div>
 
-  <main class="main">
-    <header class="topbar">
-      <div>
-        <div class="topbar-title" id="chatTitle">Yeni sohbet</div>
-        <div class="topbar-sub">Enter: gönder • Shift+Enter: satır</div>
+  <button class="btn" id="newChat">+ Yeni Sohbet</button>
+
+  <div class="tools">
+    <button class="tool" id="themeBtn">🌙 / ☀️</button>
+    <button class="tool" id="clearAll">🧹</button>
+  </div>
+
+  <div class="chatlist" id="chatList"></div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div id="chatTitle">Yeni sohbet</div>
+    <div>Hazır</div>
+  </div>
+
+  <div class="messages" id="messages">
+    <div class="empty" id="empty">
+      <div class="empty-card">
+        <b>Nereden başlayalım?</b><br/>
+        Bir mesaj yaz reis.
       </div>
-      <div class="topbar-sub">Hazır</div>
-    </header>
+    </div>
+  </div>
 
-    <section class="messages" id="messages"></section>
-
-    <section class="composer">
-      <div class="composer-inner">
-        <textarea id="input" class="text" placeholder="Mesaj yaz..."></textarea>
-        <button class="send" id="sendBtn">Gönder</button>
-      </div>
-    </section>
-  </main>
+  <div class="composer">
+    <div class="composer-inner">
+      <textarea id="input" placeholder="Mesaj yaz..."></textarea>
+      <button class="send" id="send">Gönder</button>
+    </div>
+  </div>
+</main>
 
 </div>
 
 <script>
-const BACKEND_URL="/api/chat";
-const LS_KEY="morai_memory_v2";
+const API="/api/chat";
+const LS="morai_full_v1";
+let chats=JSON.parse(localStorage.getItem(LS)||"[]");
+let current=0;
 
-let chats=JSON.parse(localStorage.getItem(LS_KEY)||"[]");
-let current=0, sending=false;
 if(!chats.length) chats.push({title:"Yeni sohbet",messages:[]});
 
+function save(){localStorage.setItem(LS,JSON.stringify(chats));}
+
+function renderChats(){
+  const list=document.getElementById("chatList");
+  list.innerHTML="";
+  chats.forEach((c,i)=>{
+    const d=document.createElement("div");
+    d.className="chat-item"+(i===current?" active":"");
+    d.innerHTML=`<span>${c.title}</span>
+      <span class="menu" onclick="delChat(${i})">⋯</span>`;
+    d.onclick=()=>{current=i;render();}
+    list.appendChild(d);
+  });
+}
+
 function render(){
+  renderChats();
   const box=document.getElementById("messages");
-  const title=document.getElementById("chatTitle");
-  box.innerHTML="";
-  title.textContent=chats[current].title;
-  chats[current].messages.forEach(m=>{
-    const row=document.createElement("div");
-    row.className="row "+m.role;
-    const bub=document.createElement("div");
-    bub.className="bubble "+m.role;
-    bub.textContent=m.content;
-    row.appendChild(bub); box.appendChild(row);
+  const empty=document.getElementById("empty");
+  box.querySelectorAll(".row").forEach(x=>x.remove());
+  const chat=chats[current];
+  document.getElementById("chatTitle").textContent=chat.title;
+  if(chat.messages.length===0){empty.style.display="flex";return;}
+  empty.style.display="none";
+  chat.messages.forEach(m=>{
+    const r=document.createElement("div");
+    r.className="row "+m.role;
+    const b=document.createElement("div");
+    b.className="bubble "+m.role;
+    b.textContent=m.content;
+    r.appendChild(b);
+    box.appendChild(r);
   });
   box.scrollTop=box.scrollHeight;
 }
 
-async function sendMessage(){
-  if(sending) return;
+async function send(){
   const input=document.getElementById("input");
   const text=input.value.trim();
   if(!text) return;
-
   const chat=chats[current];
   if(chat.title==="Yeni sohbet") chat.title=text.slice(0,32);
   chat.messages.push({role:"user",content:text});
-  input.value=""; render();
+  input.value="";
+  render();
 
-  const history=chat.messages.filter(m=>m.role==="user"||m.role==="ai").slice(-10);
-  sending=true;
-
-  try{
-    const r=await fetch(BACKEND_URL,{
-      method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({messages:history})
-    });
-    const j=await r.json();
-    chat.messages.push({role:"ai",content:j.reply||"Cevap gelmedi"});
-  }catch{
-    chat.messages.push({role:"ai",content:"Sunucu hatası"});
-  }
-  sending=false;
-  localStorage.setItem(LS_KEY,JSON.stringify(chats));
+  const history=chat.messages.slice(-10);
+  const r=await fetch(API,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({messages:history})
+  });
+  const j=await r.json();
+  chat.messages.push({role:"ai",content:j.reply});
+  save();
   render();
 }
 
-document.getElementById("sendBtn").onclick=sendMessage;
-document.getElementById("input").addEventListener("keydown",e=>{
-  if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage();}
-});
-document.getElementById("newChatBtn").onclick=()=>{
-  chats.push({title:"Yeni sohbet",messages:[]});
-  current=chats.length-1;
-  localStorage.setItem(LS_KEY,JSON.stringify(chats));
+function delChat(i){
+  chats.splice(i,1);
+  if(!chats.length) chats.push({title:"Yeni sohbet",messages:[]});
+  current=0;
+  save();
   render();
+}
+
+document.getElementById("send").onclick=send;
+document.getElementById("input").onkeydown=e=>{
+  if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}
+};
+document.getElementById("newChat").onclick=()=>{
+  chats.unshift({title:"Yeni sohbet",messages:[]});
+  current=0;
+  save();render();
+};
+document.getElementById("themeBtn").onclick=()=>{
+  document.body.classList.toggle("dark");
+};
+document.getElementById("clearAll").onclick=()=>{
+  chats=[{title:"Yeni sohbet",messages:[]}];
+  current=0;save();render();
 };
 
 render();
