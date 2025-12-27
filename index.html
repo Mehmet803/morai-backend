@@ -828,7 +828,18 @@
       const res = await fetch(BACKEND_URL, {
         method:"POST",
         headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify({ message: text })
+        const history = chat.messages
+  .filter(m => m.role !== "typing")
+  .slice(-10)
+  .map(m => ({
+    role: m.role,
+    content: m.content
+  }));
+
+body: JSON.stringify({
+  messages: history
+})
+
       });
 
       const data = await res.json();
