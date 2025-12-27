@@ -6,139 +6,187 @@
 <title>MorAI</title>
 
 <style>
+:root{
+  --bg:#020617;
+  --panel:#020617;
+  --panel2:#0b1220;
+  --border:#1f2937;
+  --text:#e5e7eb;
+  --muted:#9ca3af;
+  --accent:#22c55e;
+  --accentSoft:#052e16;
+  --bubbleUser:#16a34a;
+  --bubbleAI:#0b1220;
+  --shadow:0 10px 30px rgba(0,0,0,.45);
+}
 *{box-sizing:border-box}
-body{margin:0;font-family:Arial;background:#020617;color:#e5e7eb;height:100vh;display:flex}
-.app{display:flex;width:100%}
-.sidebar{width:260px;background:#020617;border-right:1px solid #1f2937;padding:12px}
+body{
+  margin:0;
+  font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+  background:
+    radial-gradient(900px 500px at 15% 0%, rgba(16,185,129,.16), transparent 60%),
+    radial-gradient(900px 500px at 85% 10%, rgba(56,189,248,.12), transparent 60%),
+    var(--bg);
+  color:var(--text);
+  height:100vh;
+  display:flex;
+  overflow:hidden;
+}
+.app{display:flex;width:100%;max-width:1400px;margin:0 auto}
+
+/* Sidebar */
+.sidebar{
+  width:280px;background:linear-gradient(to bottom,var(--panel),var(--panel2));
+  border-right:1px solid var(--border);padding:14px;display:flex;flex-direction:column;gap:12px
+}
+.brand{display:flex;align-items:center;justify-content:space-between}
+.brand-left{display:flex;gap:10px;align-items:center}
+.logo{width:28px;height:28px;border-radius:999px;background:radial-gradient(circle at 30% 30%, #a7f3d0,#22c55e);box-shadow:0 0 18px rgba(34,197,94,.55)}
+.pill{font-size:11px;padding:4px 8px;border-radius:999px;background:var(--accentSoft);color:var(--accent);border:1px solid rgba(34,197,94,.25)}
+.btn{border:none;background:var(--accent);color:#052e16;font-weight:700;border-radius:10px;padding:10px 12px;cursor:pointer}
+.chatlist{flex:1;border:1px solid var(--border);border-radius:12px;background:rgba(2,6,23,.35);padding:6px;overflow:auto}
+
+/* Main */
 .main{flex:1;display:flex;flex-direction:column}
-.top{height:50px;border-bottom:1px solid #1f2937;padding:12px;font-weight:bold}
-.messages{flex:1;overflow:auto;padding:12px}
-.row{margin-bottom:10px}
-.user{color:#22c55e}
-.ai{color:#e5e7eb}
-.composer{border-top:1px solid #1f2937;padding:10px;display:flex;gap:8px}
-textarea{flex:1;resize:none;padding:8px;background:#020617;color:#e5e7eb;border:1px solid #334155}
-button{padding:8px 14px;background:#22c55e;border:none;color:#052e16;font-weight:bold;cursor:pointer}
+.topbar{
+  height:56px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;padding:0 18px;
+  background:rgba(2,6,23,.55);backdrop-filter:blur(10px)
+}
+.topbar-title{font-weight:700;font-size:14px}
+.topbar-sub{font-size:11px;color:var(--muted)}
+.messages{flex:1;overflow:auto;padding:18px 20px}
+
+/* Bubbles */
+.row{display:flex;margin-bottom:10px}
+.row.user{justify-content:flex-end}
+.bubble{
+  max-width:72%;padding:11px 13px;border-radius:16px;
+  box-shadow:0 6px 18px rgba(0,0,0,.35);
+  white-space:pre-wrap;line-height:1.45
+}
+.bubble.user{background:var(--bubbleUser);color:#ecfdf5;border-bottom-right-radius:6px}
+.bubble.ai{background:var(--bubbleAI);color:var(--text);border:1px solid rgba(148,163,184,.18);border-bottom-left-radius:6px}
+
+/* Composer */
+.composer{
+  border-top:1px solid var(--border);padding:12px 14px;
+  background:rgba(2,6,23,.65);backdrop-filter:blur(10px)
+}
+.composer-inner{
+  display:flex;gap:10px;align-items:flex-end;
+  border:1px solid #334155;background:#020617;border-radius:14px;padding:10px
+}
+.text{
+  flex:1;min-height:22px;max-height:140px;resize:none;border:none;outline:none;
+  background:transparent;color:var(--text);font-size:14px
+}
+.send{border:none;background:var(--accent);color:#052e16;font-weight:800;padding:10px 14px;border-radius:12px;cursor:pointer}
+
+@media(max-width:900px){.sidebar{display:none}}
 </style>
 </head>
 
 <body>
 <div class="app">
 
-  <div class="sidebar">
-    <button id="newChatBtn">+ Yeni Sohbet</button>
-  </div>
-
-  <div class="main">
-    <div class="top" id="chatTitle">Yeni sohbet</div>
-    <div class="messages" id="messages"></div>
-
-    <div class="composer">
-      <textarea id="input" rows="2" placeholder="Mesaj yaz..."></textarea>
-      <button id="sendBtn">Gönder</button>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-left">
+        <div class="logo"></div>
+        <div>MorAI</div>
+      </div>
+      <div class="pill">Gemini</div>
     </div>
-  </div>
+    <button class="btn" id="newChatBtn">+ Yeni Sohbet</button>
+    <div class="chatlist"></div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <div class="topbar-title" id="chatTitle">Yeni sohbet</div>
+        <div class="topbar-sub">Enter: gönder • Shift+Enter: satır</div>
+      </div>
+      <div class="topbar-sub">Hazır</div>
+    </header>
+
+    <section class="messages" id="messages"></section>
+
+    <section class="composer">
+      <div class="composer-inner">
+        <textarea id="input" class="text" placeholder="Mesaj yaz..."></textarea>
+        <button class="send" id="sendBtn">Gönder</button>
+      </div>
+    </section>
+  </main>
 
 </div>
 
 <script>
-/* ================= CONFIG ================= */
-const BACKEND_URL = "/api/chat";
-const LS_KEY = "morai_memory_v1";
+const BACKEND_URL="/api/chat";
+const LS_KEY="morai_memory_v2";
 
-/* ================= STATE ================= */
-let chats = JSON.parse(localStorage.getItem(LS_KEY) || "[]");
-let current = 0;
-let sending = false;
+let chats=JSON.parse(localStorage.getItem(LS_KEY)||"[]");
+let current=0, sending=false;
+if(!chats.length) chats.push({title:"Yeni sohbet",messages:[]});
 
-if(chats.length === 0){
-  chats.push({ title:"Yeni sohbet", messages: [] });
-}
-
-/* ================= RENDER ================= */
 function render(){
-  const box = document.getElementById("messages");
-  const title = document.getElementById("chatTitle");
-  box.innerHTML = "";
-  title.textContent = chats[current].title;
-
+  const box=document.getElementById("messages");
+  const title=document.getElementById("chatTitle");
+  box.innerHTML="";
+  title.textContent=chats[current].title;
   chats[current].messages.forEach(m=>{
-    const div = document.createElement("div");
-    div.className = "row " + m.role;
-    div.textContent = m.content;
-    box.appendChild(div);
+    const row=document.createElement("div");
+    row.className="row "+m.role;
+    const bub=document.createElement("div");
+    bub.className="bubble "+m.role;
+    bub.textContent=m.content;
+    row.appendChild(bub); box.appendChild(row);
   });
-
-  box.scrollTop = box.scrollHeight;
+  box.scrollTop=box.scrollHeight;
 }
 
-/* ================= SEND ================= */
 async function sendMessage(){
   if(sending) return;
-
-  const input = document.getElementById("input");
-  const text = input.value.trim();
+  const input=document.getElementById("input");
+  const text=input.value.trim();
   if(!text) return;
 
-  const chat = chats[current];
+  const chat=chats[current];
+  if(chat.title==="Yeni sohbet") chat.title=text.slice(0,32);
+  chat.messages.push({role:"user",content:text});
+  input.value=""; render();
 
-  if(chat.title === "Yeni sohbet"){
-    chat.title = text.slice(0,32);
-  }
-
-  chat.messages.push({ role:"user", content:text });
-  input.value = "";
-  render();
-
-  // 🔥 HAFIZA (son 10 mesaj)
-  const history = chat.messages
-    .filter(m => m.role === "user" || m.role === "ai")
-    .slice(-10);
-
-  sending = true;
+  const history=chat.messages.filter(m=>m.role==="user"||m.role==="ai").slice(-10);
+  sending=true;
 
   try{
-    const res = await fetch(BACKEND_URL,{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ messages: history })
+    const r=await fetch(BACKEND_URL,{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({messages:history})
     });
-
-    const data = await res.json();
-    chat.messages.push({
-      role:"ai",
-      content: data.reply || "Cevap gelmedi"
-    });
-  }catch(e){
-    chat.messages.push({
-      role:"ai",
-      content:"Sunucu hatası"
-    });
+    const j=await r.json();
+    chat.messages.push({role:"ai",content:j.reply||"Cevap gelmedi"});
+  }catch{
+    chat.messages.push({role:"ai",content:"Sunucu hatası"});
   }
-
-  sending = false;
-  localStorage.setItem(LS_KEY, JSON.stringify(chats));
+  sending=false;
+  localStorage.setItem(LS_KEY,JSON.stringify(chats));
   render();
 }
 
-/* ================= EVENTS ================= */
-document.getElementById("sendBtn").addEventListener("click", sendMessage);
-
-document.getElementById("input").addEventListener("keydown", e=>{
-  if(e.key === "Enter" && !e.shiftKey){
-    e.preventDefault();
-    sendMessage();
-  }
+document.getElementById("sendBtn").onclick=sendMessage;
+document.getElementById("input").addEventListener("keydown",e=>{
+  if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage();}
 });
-
-document.getElementById("newChatBtn").addEventListener("click", ()=>{
-  chats.push({ title:"Yeni sohbet", messages: [] });
-  current = chats.length - 1;
-  localStorage.setItem(LS_KEY, JSON.stringify(chats));
+document.getElementById("newChatBtn").onclick=()=>{
+  chats.push({title:"Yeni sohbet",messages:[]});
+  current=chats.length-1;
+  localStorage.setItem(LS_KEY,JSON.stringify(chats));
   render();
-});
+};
 
-/* ================= START ================= */
 render();
 </script>
 </body>
