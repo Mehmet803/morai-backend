@@ -698,7 +698,13 @@
       const res = await fetch(BACKEND_URL,{
         method:"POST",
         headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify({ message:text })
+        const cleanMessages = chat.messages.map(m => ({
+  role: m.role,
+  content: m.content
+}));
+
+body: JSON.stringify({ messages: cleanMessages })
+
       });
       const data = await res.json();
       chat.messages.push({ role:"ai", content:data.reply || "" });
