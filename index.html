@@ -782,11 +782,16 @@
   inputEl.addEventListener("input", ()=>{
     charInfo.textContent = String(inputEl.value.length);
   });
+inputEl.addEventListener("keydown", (e)=>{
+  if(e.key === "Enter"){
+    if(e.shiftKey) return;
+    e.preventDefault();
 
-  inputEl.addEventListener("keydown", (e)=>{
-    if(e.key === "Enter" && !e.shiftKey){
-      e.preventDefault();
-      sendMessage();
+    if(inputEl.value.trim().length === 0) return;
+    sendMessage();
+  }
+});
+
     }
   });
 
@@ -880,6 +885,9 @@ body: JSON.stringify({
   ensureChat();
   renderAll();
   setStatus("Hazır");
+  sending = false;
+sendBtn.disabled = false;
+
 </script>
 </body>
 </html>
