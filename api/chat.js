@@ -1,101 +1,40 @@
-/* ===============================
-   MORAI CHAT.JS (HAFIZALI)
-   =============================== */
-
-const API_URL = "https://morai-backend-git-main-mehmets-projects-5ba929d4.vercel.app/api/chat";
-const MEMORY_KEY = "morai_chat_memory";
-const MAX_MEMORY = 20; // son 20 mesajı tutar
-
-// Hafızayı yükle
-function loadMemory() {
-  try {
-    return JSON.parse(localStorage.getItem(MEMORY_KEY)) || [];
-  } catch {
-    return [];
-  }
-}
-
-// Hafızayı kaydet
-function saveMemory(memory) {
-  localStorage.setItem(MEMORY_KEY, JSON.stringify(memory));
-}
-
-// Hafızayı temizle
-function clearMemory() {
-  localStorage.removeItem(MEMORY_KEY);
-}
-
-// Ana gönderme fonksiyonu
-async function sendMessageToMorAI(userText) {
-  let memory = loadMemory();
-
-  // Kullanıcı mesajı
-  memory.push({
-    role: "user",
-    content: userText,
-    time: Date.now()
-  });
-
-  // Hafızayı sınırla
-  if (memory.length > MAX_MEMORY) {
-    memory = memory.slice(-MAX_MEMORY);
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ reply: "Only POST allowed" });
   }
 
-  saveMemory(memory);
-
   try {
-    const response = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        messages: memory.map(m => ({
-          role: m.role,
-          content: m.content
-        }))
-      })
-    });
+    const { messages } = req.body;
 
-    if (!response.ok) {
-      throw new Error("API_ERROR");
-    }
+    const response = await fetch(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" +
+        process.env.GEMINI_API_KEY,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: messages.map(m => ({
+            parts: [{ text: m.content }]
+          }))
+        })
+      }
+    );
 
     const data = await response.json();
 
-    const botReply = data.reply || "Cevap alınamadı.";
+    const reply =
+      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+      "Cevap alınamadı";
 
-    // Bot cevabı
-    memory.push({
-      role: "assistant",
-      content: botReply,
-      time: Date.now()
+    // 🔴 HER ZAMAN JSON DÖN
+    return res.status(200).json({ reply });
+
+  } catch (err) {
+    console.error(err);
+
+    // 🔴 ASLA res.send / düz yazı YOK
+    return res.status(500).json({
+      reply: "Sunucu hatası"
     });
-
-    if (memory.length > MAX_MEMORY) {
-      memory = memory.slice(-MAX_MEMORY);
-    }
-
-    saveMemory(memory);
-
-    return botReply;
-
-  } catch (error) {
-    console.error("MorAI hata:", error);
-    return "❌ Sunucuya bağlanılamadı (Failed to fetch)";
   }
 }
-
-/* ===============================
-   UI İÇİN YARDIMCI
-   =============================== */
-
-// Sayfa açılınca eski sohbeti al
-function getConversation() {
-  return loadMemory();
-}
-
-// Global erişim (HTML'den çağırabilmek için)
-window.sendMessageToMorAI = sendMessageToMorAI;
-window.clearMorAIMemory = clearMemory;
-window.getMorAIConversation = getConversation;
