@@ -5,44 +5,28 @@
 <title>MorAI</title>
 
 <style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 html, body {
+  margin: 0;
   width: 100%;
   height: 100%;
   font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
 }
 
-/* ARKA PLAN */
 body {
-  background-image: url("./porsche.jpg");
+  background:
+    linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.65)),
+    url("https://images.unsplash.com/photo-1605559424843-9c0d48b3f0b1?auto=format&fit=crop&w=1920&q=80");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-attachment: fixed;
 }
 
-/* GRADIENT + CAM */
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: linear-gradient(
-    rgba(0,0,0,0.45),
-    rgba(0,0,0,0.65)
-  );
-}
-
-/* MERKEZ KART */
 .card {
   position: absolute;
   top: 50%;
   left: 55%;
   transform: translate(-50%, -50%);
-  background: rgba(20,22,30,0.85);
+  background: rgba(20,22,30,0.88);
   padding: 28px 36px;
   border-radius: 16px;
   color: #fff;
@@ -52,7 +36,7 @@ body {
 }
 
 .card h2 {
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .card p {
@@ -72,8 +56,6 @@ body {
 </head>
 
 <body>
-  <div class="overlay"></div>
-
   <div class="card">
     <h2>Nereden başlayalım?</h2>
     <p>Bir mesaj yaz reis.</p>
