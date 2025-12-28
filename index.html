@@ -2,161 +2,56 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>MorAI</title>
 
 <style>
 :root{
-  --bg:#f6f7fb;
-  --panel:#ffffff;
-  --panel2:#f9fafb;
-  --border:#e5e7eb;
-  --text:#0f172a;
-  --muted:#6b7280;
-  --accent:#10b981;
-  --accentSoft:#d1fae5;
-  --bubbleUser:#10b981;
-  --bubbleAI:#eef2f7;
+--bg:#f6f7fb;--panel:#ffffff;--panel2:#f9fafb;--border:#e5e7eb;
+--text:#0f172a;--muted:#6b7280;--accent:#10b981;--accentSoft:#d1fae5;
+--bubbleUser:#10b981;--bubbleAI:#eef2f7;
 }
 body.dark{
-  --bg:#020617;
-  --panel:#020617;
-  --panel2:#0b1220;
-  --border:#1f2937;
-  --text:#e5e7eb;
-  --muted:#9ca3af;
-  --accent:#22c55e;
-  --accentSoft:#052e16;
-  --bubbleUser:#16a34a;
-  --bubbleAI:#0b1220;
+--bg:#020617;--panel:#020617;--panel2:#0b1220;--border:#1f2937;
+--text:#e5e7eb;--muted:#9ca3af;--accent:#22c55e;--accentSoft:#052e16;
+--bubbleUser:#16a34a;--bubbleAI:#0b1220;
 }
 *{box-sizing:border-box}
 body{
-  margin:0;
-  font-family:system-ui,Arial;
-  background:var(--bg);
-  color:var(--text);
-  height:100vh;
-  display:flex;
-  overflow:hidden;
+margin:0;font-family:system-ui;
+background:radial-gradient(900px 500px at 15% 0%, rgba(16,185,129,.16), transparent 60%),
+radial-gradient(900px 500px at 85% 10%, rgba(56,189,248,.12), transparent 60%),var(--bg);
+color:var(--text);height:100vh;display:flex;overflow:hidden
 }
-.app{display:flex;width:100%;max-width:1400px;margin:0 auto}
-
-/* Sidebar */
-.sidebar{
-  width:280px;
-  background:linear-gradient(to bottom,var(--panel),var(--panel2));
-  border-right:1px solid var(--border);
-  padding:12px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
+.app{display:flex;width:100%;max-width:1400px;margin:auto}
+.sidebar{width:290px;padding:14px;border-right:1px solid var(--border);
+background:linear-gradient(var(--panel),var(--panel2));display:flex;flex-direction:column;gap:12px}
 .brand{display:flex;justify-content:space-between;align-items:center}
-.brand-left{display:flex;gap:8px;align-items:center}
-.logo{width:26px;height:26px;border-radius:50%;background:#22c55e}
-.btn{
-  border:none;
-  background:var(--accent);
-  color:#fff;
-  font-weight:700;
-  border-radius:8px;
-  padding:8px;
-  cursor:pointer;
-}
-.tools{display:flex;gap:6px}
-.tool{
-  flex:1;
-  background:transparent;
-  border:1px solid var(--border);
-  color:var(--text);
-  border-radius:999px;
-  padding:6px;
-  cursor:pointer;
-}
-.chatlist{
-  flex:1;
-  border:1px solid var(--border);
-  border-radius:10px;
-  overflow:auto;
-}
-.chat-item{
-  display:flex;
-  justify-content:space-between;
-  padding:8px;
-  cursor:pointer;
-}
+.brand-left{display:flex;gap:10px;align-items:center}
+.logo{width:28px;height:28px;border-radius:50%;background:#22c55e}
+.pill{font-size:11px;padding:4px 8px;border-radius:999px;background:var(--accentSoft);color:var(--accent)}
+.btn{background:var(--accent);border:none;color:#fff;border-radius:10px;padding:10px;font-weight:600;cursor:pointer}
+.chatlist{flex:1;overflow:auto;border:1px solid var(--border);border-radius:12px;padding:4px}
+.chat-item{padding:8px;border-radius:8px;cursor:pointer;display:flex;justify-content:space-between}
 .chat-item.active{background:var(--accentSoft)}
-.menu{display:none}
-.chat-item:hover .menu{display:block}
-
-/* Main */
+.menu-btn{background:none;border:none;cursor:pointer}
+.menu{display:none;position:absolute;background:var(--panel);border:1px solid var(--border)}
+.menu.open{display:block}
 .main{flex:1;display:flex;flex-direction:column}
-.topbar{
-  height:50px;
-  border-bottom:1px solid var(--border);
-  padding:10px;
-  display:flex;
-  justify-content:space-between;
-}
-.messages{
-  flex:1;
-  overflow:auto;
-  padding:16px;
-  position:relative;
-}
-.empty{
-  position:absolute;
-  inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-.empty-card{
-  padding:20px;
-  border:1px solid var(--border);
-  border-radius:12px;
-  background:var(--panel);
-}
+.topbar{height:56px;display:flex;justify-content:space-between;align-items:center;padding:0 18px;border-bottom:1px solid var(--border)}
+.messages{flex:1;overflow:auto;padding:18px;position:relative}
+.empty{position:absolute;inset:0;display:flex;justify-content:center;align-items:center}
+.empty-card{background:rgba(255,255,255,.6);padding:18px;border-radius:16px}
 .row{display:flex;margin-bottom:10px}
 .row.user{justify-content:flex-end}
-.bubble{
-  max-width:70%;
-  padding:10px 12px;
-  border-radius:14px;
-  white-space:pre-wrap;
-}
-.bubble.user{
-  background:var(--bubbleUser);
-  color:#ecfdf5;
-}
-.bubble.ai{
-  background:var(--bubbleAI);
-}
-
-/* Composer */
-.composer{
-  border-top:1px solid var(--border);
-  padding:10px;
-}
-.composer-inner{
-  display:flex;
-  gap:8px;
-}
-textarea{
-  flex:1;
-  resize:none;
-  padding:8px;
-}
-.send{
-  background:var(--accent);
-  border:none;
-  color:#fff;
-  font-weight:700;
-  padding:8px 14px;
-  border-radius:8px;
-  cursor:pointer;
-}
+.bubble{max-width:70%;padding:10px 12px;border-radius:16px}
+.bubble.user{background:var(--bubbleUser);color:#fff}
+.bubble.ai{background:var(--bubbleAI)}
+.composer{border-top:1px solid var(--border);padding:12px}
+.composer-inner{display:flex;gap:10px}
+.text{flex:1;resize:none;border:none;outline:none}
+.send{background:var(--accent);border:none;color:#fff;border-radius:10px;padding:10px;font-weight:700}
+@media(max-width:900px){.sidebar{display:none}}
 </style>
 </head>
 
@@ -164,248 +59,108 @@ textarea{
 <div class="app">
 
 <aside class="sidebar">
-  <div class="brand">
-    <div class="brand-left">
-      <div class="logo"></div>
-      <b>MorAI</b>
-    </div>
-    <span>Gemini</span>
-  </div>
-
-  <button class="btn" id="newChat">+ Yeni Sohbet</button>
-
-  <div class="tools">
-    <button class="tool" id="themeBtn">🌙 / ☀️</button>
-    <button class="tool" id="clearAll">🧹</button>
-  </div>
-
-  <div class="chatlist" id="chatList"></div>
+<div class="brand">
+<div class="brand-left"><div class="logo"></div><b>MorAI</b></div>
+<div class="pill">Gemini</div>
+</div>
+<button class="btn" id="newChatBtn">+ Yeni sohbet</button>
+<div class="chatlist" id="chatList"></div>
 </aside>
 
 <main class="main">
-  <div class="topbar">
-    <div id="chatTitle">Yeni sohbet</div>
-    <div>Hazır</div>
-  </div>
-
-  <div class="messages" id="messages">
-    <div class="empty" id="empty">
-      <div class="empty-card">
-        <b>Nereden başlayalım?</b><br/>
-        Bir mesaj yaz reis.
-      </div>
-    </div>
-  </div>
-
-  <div class="composer">
-    <div class="composer-inner">
-      <textarea id="input" placeholder="Mesaj yaz..."></textarea>
-      <button class="send" id="send">Gönder</button>
-    </div>
-  </div>
-</main>
-
+<header class="topbar">
+<div>
+<b id="chatTitle">Yeni sohbet</b><br>
+<small>Enter: gönder • Shift+Enter: satır</small>
 </div>
+<div id="statusText">Hazır</div>
+</header>
+
+<section class="messages" id="messages">
+<div class="empty" id="emptyState">
+<div class="empty-card">
+<b>Nereden başlayalım?</b>
+<p>Bir mesaj yaz reis.</p>
+</div>
+</div>
+</section>
+
+<section class="composer">
+<div class="composer-inner">
+<textarea id="input" class="text" placeholder="Mesaj yaz..."></textarea>
+<button class="send" id="sendBtn">Gönder</button>
+</div>
+</section>
+</main>
+</div>
+
 <script>
-const BACKEND_URL = "/api/chat";
-const LS_CHATS = "morai_chats_v2";
-const LS_THEME = "morai_theme_v2";
+const BACKEND_URL="/api/chat";
+const LS="morai_chats";
+const THEME="morai_theme";
 
-let chats = JSON.parse(localStorage.getItem(LS_CHATS) || "[]");
-let currentId = chats[0]?.id || null;
-let sending = false;
+let chats=JSON.parse(localStorage.getItem(LS)||"[]");
+let current=0,sending=false;
+if(!chats.length)chats=[{title:"Yeni sohbet",messages:[]}];
 
-function save(){
-  localStorage.setItem(LS_CHATS, JSON.stringify(chats));
-}
-function uid(){
-  return Math.random().toString(16).slice(2)+"-"+Date.now().toString(16);
-}
-function byId(id){
-  return chats.find(c=>c.id===id);
-}
-function setStatus(t){
-  document.getElementById("statusText").textContent=t;
-}
-
-/* ===== THEME ===== */
-function applyThemeFromStorage(){
-  const t=localStorage.getItem(LS_THEME);
-  document.body.classList.toggle("dark", t!=="light");
-}
-function toggleTheme(){
-  const d=document.body.classList.toggle("dark");
-  localStorage.setItem(LS_THEME,d?"dark":"light");
+function save(){localStorage.setItem(LS,JSON.stringify(chats))}
+function render(){
+const box=document.getElementById("messages");
+const empty=document.getElementById("emptyState");
+box.querySelectorAll(".row").forEach(e=>e.remove());
+document.getElementById("chatTitle").textContent=chats[current].title;
+if(!chats[current].messages.length){empty.style.display="flex";return;}
+empty.style.display="none";
+chats[current].messages.forEach(m=>{
+const r=document.createElement("div");
+r.className="row "+m.role;
+const b=document.createElement("div");
+b.className="bubble "+m.role;
+b.textContent=m.content;
+r.appendChild(b);box.appendChild(r);
+});
+box.scrollTop=box.scrollHeight;
 }
 
-/* ===== CHAT ===== */
-function ensureChat(){
-  if(!chats.length){
-    const id=uid();
-    chats=[{id,title:"Yeni sohbet",messages:[]}];
-    currentId=id;
-    save();
-  }
-  if(!currentId) currentId=chats[0].id;
-}
-
-function newChat(){
-  const id=uid();
-  chats.unshift({id,title:"Yeni sohbet",messages:[]});
-  currentId=id;
-  save();
-  renderAll();
-}
-
-function deleteChat(id){
-  chats=chats.filter(c=>c.id!==id);
-  ensureChat();
-  save();
-  renderAll();
-}
-
-function renderChatList(){
-  const list=document.getElementById("chatList");
-  list.innerHTML="";
-  chats.forEach(c=>{
-    const item=document.createElement("div");
-    item.className="chat-item"+(c.id===currentId?" active":"");
-    item.onclick=()=>{currentId=c.id;renderAll();};
-
-    const t=document.createElement("div");
-    t.className="chat-title";
-    t.textContent=c.title;
-
-    const m=document.createElement("div");
-    m.className="chat-meta";
-    m.textContent=c.messages.length?String(c.messages.length):"";
-
-    const wrap=document.createElement("div");
-    wrap.className="menu-wrap";
-
-    const btn=document.createElement("button");
-    btn.className="menu-btn";
-    btn.textContent="⋯";
-    btn.onclick=e=>{
-      e.stopPropagation();
-      menu.classList.toggle("open");
-    };
-
-    const menu=document.createElement("div");
-    menu.className="menu";
-
-    const del=document.createElement("div");
-    del.className="menu-item danger";
-    del.innerHTML="<span>Sil</span><span>🗑️</span>";
-    del.onclick=e=>{
-      e.stopPropagation();
-      deleteChat(c.id);
-    };
-
-    menu.appendChild(del);
-    wrap.appendChild(btn);
-    wrap.appendChild(menu);
-
-    item.appendChild(t);
-    item.appendChild(m);
-    item.appendChild(wrap);
-    list.appendChild(item);
-  });
-}
-
-function renderMessages(){
-  const box=document.getElementById("messages");
-  const empty=document.getElementById("emptyState");
-  box.querySelectorAll(".row").forEach(n=>n.remove());
-
-  const chat=byId(currentId);
-  if(!chat.messages.length){
-    empty.style.display="flex";
-    return;
-  }
-  empty.style.display="none";
-
-  chat.messages.forEach(m=>{
-    const r=document.createElement("div");
-    r.className="row "+m.role;
-    const b=document.createElement("div");
-    b.className="bubble "+m.role;
-    b.textContent=m.content;
-    r.appendChild(b);
-    box.appendChild(r);
-  });
-  box.scrollTop=box.scrollHeight;
-}
-
-function renderAll(){
-  renderChatList();
-  document.getElementById("chatTitle").textContent=byId(currentId)?.title||"Yeni sohbet";
-  renderMessages();
-}
-
-/* ===== SEND (HAFIZA BURADA) ===== */
 async function sendMessage(){
-  if(sending) return;
-  const input=document.getElementById("input");
-  const text=input.value.trim();
-  if(!text) return;
+if(sending)return;
+const input=document.getElementById("input");
+const text=input.value.trim();
+if(!text)return;
+const chat=chats[current];
+if(chat.title==="Yeni sohbet")chat.title=text.slice(0,32);
+chat.messages.push({role:"user",content:text});
+input.value="";save();render();
 
-  ensureChat();
-  const chat=byId(currentId);
+const history=chat.messages.slice(-10);
+sending=true;document.getElementById("statusText").textContent="Gönderiliyor…";
 
-  if(chat.title==="Yeni sohbet") chat.title=text.slice(0,32);
-
-  chat.messages.push({role:"user",content:text});
-  save();
-  renderAll();
-  input.value="";
-
-  // 🔥 HAFIZA: SON 10 MESAJ
-  const history=chat.messages.slice(-10);
-
-  sending=true;
-  setStatus("Gönderiliyor…");
-
-  try{
-    const r=await fetch(BACKEND_URL,{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({messages:history})
-    });
-    const j=await r.json();
-    chat.messages.push({role:"ai",content:j.reply||"Boş yanıt"});
-  }catch{
-    chat.messages.push({role:"ai",content:"Sunucu hatası"});
-  }
-
-  sending=false;
-  setStatus("Hazır");
-  save();
-  renderAll();
+try{
+const r=await fetch(BACKEND_URL,{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({messages:history})
+});
+const j=await r.json();
+chat.messages.push({role:"ai",content:j.reply||"Boş yanıt"});
+}catch{
+chat.messages.push({role:"ai",content:"Sunucu hatası"});
 }
 
-/* ===== EVENTS ===== */
+sending=false;document.getElementById("statusText").textContent="Hazır";
+save();render();
+}
+
 document.getElementById("sendBtn").onclick=sendMessage;
 document.getElementById("input").onkeydown=e=>{
-  if(e.key==="Enter"&&!e.shiftKey){
-    e.preventDefault();sendMessage();
-  }
+if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage();}
 };
-document.getElementById("newChatBtn").onclick=newChat;
-document.getElementById("themeBtn").onclick=toggleTheme;
-document.getElementById("clearAllBtn").onclick=()=>{
-  if(confirm("Tüm sohbetler silinsin mi?")){
-    chats=[];ensureChat();save();renderAll();
-  }
+document.getElementById("newChatBtn").onclick=()=>{
+chats.unshift({title:"Yeni sohbet",messages:[]});
+current=0;save();render();
 };
 
-/* ===== INIT ===== */
-applyThemeFromStorage();
-ensureChat();
-renderAll();
-setStatus("Hazır");
+render();
 </script>
-
-
 </body>
 </html>
