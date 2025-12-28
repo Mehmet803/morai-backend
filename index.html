@@ -1,194 +1,391 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MorAI</title>
 
 <style>
-/* RESET */
-*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg-dark:#020617;
+  --bg-light:#f8fafc;
+  --panel-dark:rgba(2,6,23,.72);
+  --panel-light:rgba(255,255,255,.75);
+  --border-dark:#1f2937;
+  --border-light:#e5e7eb;
+  --text-dark:#e5e7eb;
+  --text-light:#020617;
+  --accent:#22c55e;
+  --user:#16a34a;
+  --ai:#0b1220;
+}
 
-/* PORSCHE ARKA PLAN (HARİCİ DOSYA YOK) */
 body{
+  margin:0;
   height:100vh;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  font-family:system-ui,Segoe UI,Roboto,Arial;
   background:
-    linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)),
-    url("https://images.wallpapersden.com/image/download/porsche-911-gt2-rs-green_a2xpa2WUmZqaraWkpJRmbmdlrWZlbWU.jpg");
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  color:#fff;
+    linear-gradient(rgba(2,6,23,.82),rgba(2,6,23,.82)),
+    url("https://images.wallpaperscraft.com/image/single/porsche_911_gt2_rs_green_160774_3840x2160.jpg")
+    center/cover no-repeat fixed;
+  color:var(--text-dark);
+  overflow:hidden;
 }
 
-/* APP */
-.app{
-  display:flex;
-  height:100%;
-  backdrop-filter: blur(2px);
+body.light{
+  background:
+    linear-gradient(rgba(255,255,255,.75),rgba(255,255,255,.75)),
+    url("https://images.wallpaperscraft.com/image/single/porsche_911_gt2_rs_green_160774_3840x2160.jpg")
+    center/cover no-repeat fixed;
+  color:var(--text-light);
 }
+
+*{box-sizing:border-box}
+
+.app{display:flex;height:100vh;max-width:1500px;margin:0 auto}
 
 /* SIDEBAR */
 .sidebar{
   width:280px;
-  background:rgba(15,23,42,.85);
-  padding:16px;
+  padding:14px;
   display:flex;
   flex-direction:column;
   gap:12px;
+  backdrop-filter:blur(18px);
+  background:var(--panel-dark);
+  border-right:1px solid var(--border-dark);
+}
+body.light .sidebar{
+  background:var(--panel-light);
+  border-color:var(--border-light);
 }
 
 .brand{
   display:flex;
+  justify-content:space-between;
   align-items:center;
-  gap:10px;
-  font-weight:700;
 }
-
 .logo{
-  width:26px;
-  height:26px;
-  border-radius:50%;
-  background:#22c55e;
+  width:26px;height:26px;border-radius:50%;
+  background:var(--accent);
 }
-
-.newchat{
-  background:#22c55e;
+.btn{
+  background:var(--accent);
+  color:#fff;
   border:none;
   padding:10px;
   border-radius:10px;
-  color:#022c22;
   font-weight:700;
   cursor:pointer;
 }
+.tools{display:flex;gap:6px}
+.tool{
+  flex:1;
+  border:1px solid;
+  border-radius:20px;
+  padding:6px;
+  cursor:pointer;
+  background:transparent;
+  color:inherit;
+}
 
-.chatitem{
-  margin-top:10px;
-  padding:10px;
+.chatlist{flex:1;overflow:auto}
+.chat-item{
+  padding:8px 10px;
   border-radius:10px;
-  background:rgba(34,197,94,.2);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  cursor:pointer;
+}
+.chat-item.active{background:rgba(34,197,94,.2)}
+
+.menu-wrap{position:relative}
+.menu-btn{
+  background:none;border:none;color:inherit;
+  font-size:18px;cursor:pointer;
+}
+.menu{
+  position:absolute;
+  right:0;top:22px;
+  background:inherit;
+  backdrop-filter:blur(12px);
+  border:1px solid;
+  border-radius:10px;
+  display:none;
+}
+.menu.open{display:block}
+.menu div{
+  padding:8px 12px;
+  cursor:pointer;
 }
 
 /* MAIN */
-.main{
-  flex:1;
-  display:flex;
-  flex-direction:column;
-}
-
+.main{flex:1;display:flex;flex-direction:column}
 .topbar{
   height:56px;
-  background:rgba(15,23,42,.75);
   display:flex;
-  align-items:center;
   justify-content:space-between;
+  align-items:center;
   padding:0 18px;
-  font-size:14px;
+  backdrop-filter:blur(14px);
+  background:var(--panel-dark);
+  border-bottom:1px solid var(--border-dark);
+}
+body.light .topbar{
+  background:var(--panel-light);
+  border-color:var(--border-light);
 }
 
 .messages{
   flex:1;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  padding:20px;
+  overflow:auto;
+  position:relative;
 }
 
-/* EMPTY CARD */
+/* EMPTY */
 .empty{
-  background:rgba(2,6,23,.75);
-  padding:28px 32px;
-  border-radius:18px;
-  text-align:center;
-  box-shadow:0 20px 60px rgba(0,0,0,.6);
-}
-
-.empty h2{
-  margin-bottom:8px;
-}
-
-.chips{
+  position:absolute;
+  inset:0;
   display:flex;
-  gap:8px;
   justify-content:center;
-  margin-top:12px;
+  align-items:center;
+}
+.empty-card{
+  padding:22px;
+  border-radius:18px;
+  backdrop-filter:blur(16px);
+  background:var(--panel-dark);
+  border:1px solid var(--border-dark);
+  text-align:center;
+}
+body.light .empty-card{
+  background:var(--panel-light);
+  border-color:var(--border-light);
 }
 
-.chip{
-  border:1px solid rgba(255,255,255,.3);
+.quick{
+  margin:4px;
   padding:6px 12px;
   border-radius:999px;
-  font-size:12px;
+  border:1px solid;
+  background:transparent;
+  cursor:pointer;
+}
+
+/* CHAT */
+.row{display:flex;margin-bottom:12px}
+.row.user{justify-content:flex-end}
+.bubble{
+  max-width:70%;
+  padding:10px 14px;
+  border-radius:16px;
+}
+.bubble.user{background:var(--user);color:#ecfdf5}
+.bubble.ai{
+  background:var(--ai);
+  border:1px solid var(--border-dark);
 }
 
 /* COMPOSER */
 .composer{
+  border-top:1px solid var(--border-dark);
   padding:12px;
-  background:rgba(15,23,42,.75);
-  display:flex;
-  gap:10px;
+  backdrop-filter:blur(14px);
+  background:var(--panel-dark);
 }
-
+body.light .composer{
+  background:var(--panel-light);
+  border-color:var(--border-light);
+}
+.composer-inner{display:flex;gap:10px}
 textarea{
   flex:1;
+  background:transparent;
+  border:none;
   resize:none;
-  border-radius:12px;
-  border:none;
-  padding:12px;
-  font-size:14px;
+  outline:none;
+  color:inherit;
 }
-
-button.send{
-  background:#22c55e;
+.send{
+  background:var(--accent);
   border:none;
-  padding:0 18px;
+  color:#fff;
+  padding:8px 18px;
   border-radius:12px;
   font-weight:700;
   cursor:pointer;
 }
 
-@media(max-width:900px){
-  .sidebar{display:none}
-}
+@media(max-width:900px){.sidebar{display:none}}
 </style>
 </head>
 
 <body>
 <div class="app">
 
-  <aside class="sidebar">
-    <div class="brand">
-      <div class="logo"></div>
-      MorAI
+<aside class="sidebar">
+  <div class="brand">
+    <div style="display:flex;gap:8px;align-items:center">
+      <div class="logo"></div><b>MorAI</b>
     </div>
-    <button class="newchat">+ Yeni sohbet</button>
-    <div class="chatitem">Yeni sohbet</div>
-  </aside>
+    <small style="color:var(--accent)">Gemini</small>
+  </div>
 
-  <main class="main">
-    <div class="topbar">
-      <div>Yeni sohbet · Enter: gönder · Shift+Enter: satır</div>
-      <div>Hazır</div>
+  <button class="btn" id="newChat">+ Yeni sohbet</button>
+
+  <div class="tools">
+    <button class="tool" id="theme">🌙 / ☀️</button>
+    <button class="tool" id="clear">🧹</button>
+  </div>
+
+  <div class="chatlist" id="chatList"></div>
+</aside>
+
+<main class="main">
+<header class="topbar">
+  <div>
+    <b id="chatTitle">Yeni sohbet</b><br>
+    <small>Enter: gönder • Shift+Enter: satır</small>
+  </div>
+  <div id="status">Hazır</div>
+</header>
+
+<section class="messages" id="messages">
+  <div class="empty" id="empty">
+    <div class="empty-card">
+      <h3>Nereden başlayalım?</h3>
+      <p>Bir mesaj yaz reis.</p>
+      <button class="quick" data-q="BMW öner">BMW</button>
+      <button class="quick" data-q="Günlük plan yap">Plan</button>
+      <button class="quick" data-q="Motivasyon yaz">Motivasyon</button>
     </div>
+  </div>
+</section>
 
-    <div class="messages">
-      <div class="empty">
-        <h2>Nereden başlayalım?</h2>
-        <p>Bir mesaj yaz reis.</p>
-        <div class="chips">
-          <div class="chip">BMW</div>
-          <div class="chip">Plan</div>
-          <div class="chip">Motivasyon</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="composer">
-      <textarea placeholder="Mesaj yaz..."></textarea>
-      <button class="send">Gönder</button>
-    </div>
-  </main>
-
+<section class="composer">
+  <div class="composer-inner">
+    <textarea id="input" placeholder="Mesaj yaz..."></textarea>
+    <button class="send" id="send">Gönder</button>
+  </div>
+</section>
+</main>
 </div>
+
+<script>
+const LS="morai_chats_vFINAL";
+let chats=JSON.parse(localStorage.getItem(LS)||"[]");
+let current=null;
+
+function uid(){return Math.random().toString(36).slice(2)}
+function save(){localStorage.setItem(LS,JSON.stringify(chats))}
+function ensure(){
+  if(!chats.length){
+    chats=[{id:uid(),title:"Yeni sohbet",messages:[]}];
+    current=chats[0].id;
+    save();
+  }
+  if(!current) current=chats[0].id;
+}
+
+function render(){
+  const list=document.getElementById("chatList");
+  list.innerHTML="";
+  chats.forEach(c=>{
+    const row=document.createElement("div");
+    row.className="chat-item"+(c.id===current?" active":"");
+    row.onclick=()=>{current=c.id;render()};
+
+    const t=document.createElement("span");
+    t.textContent=c.title;
+
+    const mw=document.createElement("div");
+    mw.className="menu-wrap";
+    const mb=document.createElement("button");
+    mb.className="menu-btn";
+    mb.textContent="⋯";
+    const menu=document.createElement("div");
+    menu.className="menu";
+    const del=document.createElement("div");
+    del.textContent="Sil";
+    del.onclick=(e)=>{
+      e.stopPropagation();
+      chats=chats.filter(x=>x.id!==c.id);
+      current=chats[0]?.id||null;
+      ensure(); save(); render();
+    };
+    mb.onclick=(e)=>{
+      e.stopPropagation();
+      document.querySelectorAll(".menu").forEach(m=>m.classList.remove("open"));
+      menu.classList.toggle("open");
+    };
+
+    menu.appendChild(del);
+    mw.appendChild(mb);
+    mw.appendChild(menu);
+
+    row.appendChild(t);
+    row.appendChild(mw);
+    list.appendChild(row);
+  });
+
+  const chat=chats.find(c=>c.id===current);
+  document.getElementById("chatTitle").textContent=chat.title;
+
+  const wrap=document.getElementById("messages");
+  wrap.querySelectorAll(".row").forEach(e=>e.remove());
+  document.getElementById("empty").style.display=chat.messages.length?"none":"flex";
+
+  chat.messages.forEach(m=>{
+    const r=document.createElement("div");
+    r.className="row "+m.role;
+    const b=document.createElement("div");
+    b.className="bubble "+m.role;
+    b.textContent=m.content;
+    r.appendChild(b);
+    wrap.appendChild(r);
+  });
+}
+
+function send(){
+  const input=document.getElementById("input");
+  const text=input.value.trim();
+  if(!text) return;
+  ensure();
+  const chat=chats.find(c=>c.id===current);
+  if(chat.title==="Yeni sohbet") chat.title=text.slice(0,24);
+  chat.messages.push({role:"user",content:text});
+  input.value="";
+  chat.messages.push({role:"ai",content:"(demo yanıt)"});
+  save(); render();
+}
+
+document.getElementById("send").onclick=send;
+document.getElementById("input").addEventListener("keydown",e=>{
+  if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send()}
+});
+document.querySelectorAll(".quick").forEach(b=>{
+  b.onclick=()=>{document.getElementById("input").value=b.dataset.q}
+});
+document.getElementById("newChat").onclick=()=>{
+  chats.unshift({id:uid(),title:"Yeni sohbet",messages:[]});
+  current=chats[0].id; save(); render();
+};
+document.getElementById("clear").onclick=()=>{
+  if(confirm("Tüm sohbetler silinsin mi?")){
+    chats=[]; current=null; save(); ensure(); render();
+  }
+};
+document.getElementById("theme").onclick=()=>{
+  document.body.classList.toggle("light");
+};
+
+document.addEventListener("click",()=> {
+  document.querySelectorAll(".menu").forEach(m=>m.classList.remove("open"));
+});
+
+ensure(); render();
+</script>
 </body>
 </html>
