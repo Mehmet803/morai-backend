@@ -1,69 +1,194 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>MorAI</title>
 
 <style>
-html, body {
-  margin: 0;
-  width: 100%;
-  height: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
-}
+/* RESET */
+*{box-sizing:border-box;margin:0;padding:0}
 
-body {
+/* PORSCHE ARKA PLAN (HARİCİ DOSYA YOK) */
+body{
+  height:100vh;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
   background:
-    linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.65)),
-    url("https://images.unsplash.com/photo-1605559424843-9c0d48b3f0b1?auto=format&fit=crop&w=1920&q=80");
+    linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)),
+    url("https://images.wallpapersden.com/image/download/porsche-911-gt2-rs-green_a2xpa2WUmZqaraWkpJRmbmdlrWZlbWU.jpg");
   background-size: cover;
   background-position: center;
-  background-repeat: no-repeat;
+  background-attachment: fixed;
+  color:#fff;
 }
 
-.center {
-  position: absolute;
-  top: 50%;
-  left: 55%;
-  transform: translate(-50%, -50%);
-  background: rgba(20,22,30,0.88);
-  padding: 28px 36px;
-  border-radius: 16px;
-  color: #fff;
-  text-align: center;
-  box-shadow: 0 30px 80px rgba(0,0,0,0.6);
-  backdrop-filter: blur(10px);
+/* APP */
+.app{
+  display:flex;
+  height:100%;
+  backdrop-filter: blur(2px);
 }
 
-.center h2 {
-  margin-bottom: 6px;
+/* SIDEBAR */
+.sidebar{
+  width:280px;
+  background:rgba(15,23,42,.85);
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
 }
 
-.center p {
-  opacity: 0.8;
-  margin-bottom: 14px;
+.brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-weight:700;
 }
 
-.tags span {
-  display: inline-block;
-  margin: 4px;
-  padding: 6px 14px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.3);
-  font-size: 13px;
+.logo{
+  width:26px;
+  height:26px;
+  border-radius:50%;
+  background:#22c55e;
+}
+
+.newchat{
+  background:#22c55e;
+  border:none;
+  padding:10px;
+  border-radius:10px;
+  color:#022c22;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.chatitem{
+  margin-top:10px;
+  padding:10px;
+  border-radius:10px;
+  background:rgba(34,197,94,.2);
+}
+
+/* MAIN */
+.main{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+}
+
+.topbar{
+  height:56px;
+  background:rgba(15,23,42,.75);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 18px;
+  font-size:14px;
+}
+
+.messages{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* EMPTY CARD */
+.empty{
+  background:rgba(2,6,23,.75);
+  padding:28px 32px;
+  border-radius:18px;
+  text-align:center;
+  box-shadow:0 20px 60px rgba(0,0,0,.6);
+}
+
+.empty h2{
+  margin-bottom:8px;
+}
+
+.chips{
+  display:flex;
+  gap:8px;
+  justify-content:center;
+  margin-top:12px;
+}
+
+.chip{
+  border:1px solid rgba(255,255,255,.3);
+  padding:6px 12px;
+  border-radius:999px;
+  font-size:12px;
+}
+
+/* COMPOSER */
+.composer{
+  padding:12px;
+  background:rgba(15,23,42,.75);
+  display:flex;
+  gap:10px;
+}
+
+textarea{
+  flex:1;
+  resize:none;
+  border-radius:12px;
+  border:none;
+  padding:12px;
+  font-size:14px;
+}
+
+button.send{
+  background:#22c55e;
+  border:none;
+  padding:0 18px;
+  border-radius:12px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+@media(max-width:900px){
+  .sidebar{display:none}
 }
 </style>
 </head>
 
 <body>
-  <div class="center">
-    <h2>Nereden başlayalım?</h2>
-    <p>Bir mesaj yaz reis.</p>
-    <div class="tags">
-      <span>Porsche</span>
-      <span>Plan</span>
-      <span>Motivasyon</span>
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo"></div>
+      MorAI
     </div>
-  </div>
+    <button class="newchat">+ Yeni sohbet</button>
+    <div class="chatitem">Yeni sohbet</div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>Yeni sohbet · Enter: gönder · Shift+Enter: satır</div>
+      <div>Hazır</div>
+    </div>
+
+    <div class="messages">
+      <div class="empty">
+        <h2>Nereden başlayalım?</h2>
+        <p>Bir mesaj yaz reis.</p>
+        <div class="chips">
+          <div class="chip">BMW</div>
+          <div class="chip">Plan</div>
+          <div class="chip">Motivasyon</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="composer">
+      <textarea placeholder="Mesaj yaz..."></textarea>
+      <button class="send">Gönder</button>
+    </div>
+  </main>
+
+</div>
 </body>
 </html>
