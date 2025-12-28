@@ -1,29 +1,60 @@
+// 🔴 BASİT SESSION HAFIZA (RAM)
+// Not: production'da Redis / DB olur
+const memoryStore = {};
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Only POST allowed" });
   }
 
   try {
-    const { message, file } = req.body;
+    const { message } = req.body;
 
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       return res.status(500).json({ error: "GEMINI_API_KEY missing" });
     }
 
+    // 🧠 Kullanıcıyı ayırt etmek için basit key
+    const userKey =
+      req.headers["x-forwarded-for"] ||
+      req.socket.remoteAddress ||
+      "anon";
+
+    if (!memoryStore[userKey]) {
+      memoryStore[userKey] = [];
+    }
+
+    // Son mesajı hafızaya ekle
+    memoryStore[userKey].push({
+      role: "user",
+      content: message
+    });
+
+    // Hafızayı çok şişirmeyelim
+    memoryStore[userKey] = memoryStore[userKey].slice(-6);
+
     const systemPrompt = `
 Sen MorAI'sin.
-Rahat konuşursun.
-"reis", "kanka" gibi samimi hitaplar kullanırsın.
-Uzatmazsın, net konuşursun.
-Türkçe cevap verirsin.
-Gereksiz resmiyet yok.
-`;
+Türkçe konuşursun.
+Resmi değilsin.
+"reis", "kanka", "usta" gibi hitapları doğal kullanırsın.
+Askerlik arkadaşı gibi konuşursun.
+Net, havalı, sakin.
+Umursamaz ya da gevşek değilsin.
+Gereksiz uzatmazsın.
+`.trim();
 
-    let finalMessage = message || "";
-    if (file) {
-      finalMessage += "\n\n--- DOSYA İÇERİĞİ ---\n" + file;
-    }
+    const contents = [
+      {
+        role: "user",
+        parts: [{ text: systemPrompt }]
+      },
+      ...memoryStore[userKey].map(m => ({
+        role: "user",
+        parts: [{ text: m.content }]
+      }))
+    ];
 
     const response = await fetch(
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" +
@@ -31,26 +62,30 @@ Gereksiz resmiyet yok.
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                { text: systemPrompt },
-                { text: finalMessage }
-              ]
-            }
-          ]
-        }),
+        body: JSON.stringify({ contents }),
       }
     );
 
     const data = await response.json();
+
     const reply =
       data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "Valla reis bu sefer boş düştü 😅";
+      "Reis bu sefer cevap gelmedi 😅";
 
-    res.status(200).json({ reply });
+    // AI cevabını da hafızaya ekle
+    memoryStore[userKey].push({
+      role: "ai",
+      content: reply
+    });
+
+    memoryStore[userKey] = memoryStore[userKey].slice(-6);
+
+    return res.status(200).json({ reply });
+
   } catch (err) {
-    res.status(500).json({ error: "Server error", detail: String(err) });
+    return res.status(500).json({
+      error: "Server error",
+      detail: String(err)
+    });
   }
 }
