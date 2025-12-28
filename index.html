@@ -1,104 +1,173 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MorAI</title>
 
 <style>
 :root{
+  --accent:#22c55e;
   --bg:#020617;
-  --panel:#020617;
-  --panel2:#0b1220;
+  --panel:#020617cc;
   --border:#1f2937;
   --text:#e5e7eb;
   --muted:#9ca3af;
-  --accent:#22c55e;
-  --accentSoft:#052e16;
   --bubbleUser:#16a34a;
   --bubbleAI:#0b1220;
 }
 
-/* 🔥 PORSCHE BACKGROUND */
+*{box-sizing:border-box}
+
 body{
   margin:0;
-  font-family: system-ui, Arial;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
   height:100vh;
   overflow:hidden;
-  display:flex;
   color:var(--text);
   background:
     linear-gradient(rgba(2,6,23,.85), rgba(2,6,23,.85)),
-    url("porsche.jpg") center/cover no-repeat fixed;
+    url("https://images.wallpaperscraft.com/image/single/porsche_911_gt2_rs_green_160774_3840x2160.jpg")
+    center/cover no-repeat fixed;
 }
 
-*{box-sizing:border-box}
+.app{display:flex;height:100vh;max-width:1400px;margin:0 auto}
 
-.app{width:100%;display:flex;height:100vh;max-width:1400px;margin:0 auto}
-
-/* Sidebar */
+/* SIDEBAR */
 .sidebar{
-  width:290px;
-  background:linear-gradient(to bottom,var(--panel),var(--panel2));
+  width:280px;
+  background:linear-gradient(to bottom,#020617ee,#020617cc);
   border-right:1px solid var(--border);
   padding:14px;
   display:flex;
   flex-direction:column;
   gap:12px;
 }
-.brand{display:flex;justify-content:space-between;align-items:center}
-.logo{width:28px;height:28px;border-radius:50%;background:#22c55e}
-.btn{
-  background:var(--accent);border:none;color:#fff;
-  padding:10px;border-radius:10px;font-weight:700;cursor:pointer
-}
-.chip-btn{
-  border:1px solid var(--border);background:transparent;color:var(--text);
-  padding:6px;border-radius:20px;cursor:pointer
-}
-.chatlist{flex:1;overflow:auto}
 
-/* Main */
+.brand{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.logo{
+  width:26px;height:26px;border-radius:50%;
+  background:var(--accent);
+}
+.btn{
+  background:var(--accent);
+  border:none;
+  color:#fff;
+  font-weight:700;
+  padding:10px;
+  border-radius:10px;
+  cursor:pointer;
+}
+
+.tools{display:flex;gap:6px}
+.tool{
+  flex:1;
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--text);
+  border-radius:20px;
+  padding:6px;
+  cursor:pointer;
+}
+
+.chatlist{flex:1;overflow:auto}
+.chat-item{
+  padding:8px;
+  border-radius:8px;
+  cursor:pointer;
+}
+.chat-item.active{background:#22c55e33}
+
+/* MAIN */
 .main{flex:1;display:flex;flex-direction:column}
 .topbar{
-  height:56px;border-bottom:1px solid var(--border);
-  display:flex;justify-content:space-between;align-items:center;padding:0 16px
+  height:56px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:0 16px;
+  border-bottom:1px solid var(--border);
 }
-.messages{flex:1;overflow:auto;padding:20px;position:relative}
 
+.messages{
+  flex:1;
+  padding:20px;
+  overflow:auto;
+  position:relative;
+}
+
+/* EMPTY */
 .empty{
-  position:absolute;inset:0;display:flex;align-items:center;justify-content:center
+  position:absolute;
+  inset:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
 }
 .empty-card{
-  background:rgba(2,6,23,.7);border:1px solid var(--border);
-  border-radius:16px;padding:20px;text-align:center
+  background:#020617cc;
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:20px;
+  text-align:center;
 }
 .quick{
-  margin:4px;border:1px solid var(--border);
-  background:transparent;color:var(--text);
-  padding:6px 10px;border-radius:20px;cursor:pointer
+  margin:4px;
+  padding:6px 10px;
+  border-radius:20px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--text);
+  cursor:pointer;
 }
 
-/* Bubbles */
+/* CHAT */
 .row{display:flex;margin-bottom:10px}
 .row.user{justify-content:flex-end}
 .bubble{
-  max-width:70%;padding:10px;border-radius:14px
+  max-width:70%;
+  padding:10px 12px;
+  border-radius:14px;
 }
 .bubble.user{background:var(--bubbleUser)}
 .bubble.ai{background:var(--bubbleAI);border:1px solid var(--border)}
 
-/* Composer */
-.composer{border-top:1px solid var(--border);padding:10px}
-.composer-inner{display:flex;gap:10px}
-.text{flex:1;background:transparent;border:none;color:var(--text);resize:none}
-.send{background:var(--accent);border:none;color:#fff;padding:8px 14px;border-radius:10px}
+/* COMPOSER */
+.composer{
+  border-top:1px solid var(--border);
+  padding:10px;
+}
+.composer-inner{
+  display:flex;
+  gap:10px;
+}
+textarea{
+  flex:1;
+  background:transparent;
+  border:none;
+  color:var(--text);
+  resize:none;
+  outline:none;
+}
+.send{
+  background:var(--accent);
+  border:none;
+  color:#fff;
+  padding:8px 16px;
+  border-radius:10px;
+  font-weight:700;
+  cursor:pointer;
+}
 
 @media(max-width:900px){.sidebar{display:none}}
 </style>
 </head>
 
-<body class="dark">
+<body>
 <div class="app">
 
 <aside class="sidebar">
@@ -106,14 +175,14 @@ body{
     <div style="display:flex;gap:8px;align-items:center">
       <div class="logo"></div><b>MorAI</b>
     </div>
-    <span style="font-size:12px;color:#22c55e">Gemini</span>
+    <span style="color:#22c55e;font-size:12px">Gemini</span>
   </div>
 
-  <button class="btn" id="newChatBtn">+ Yeni sohbet</button>
+  <button class="btn" id="newChat">+ Yeni sohbet</button>
 
-  <div style="display:flex;gap:6px">
-    <button class="chip-btn" id="themeBtn">🌙 / ☀️</button>
-    <button class="chip-btn" id="clearAllBtn">🧹</button>
+  <div class="tools">
+    <button class="tool" id="theme">🌙 / ☀️</button>
+    <button class="tool" id="clear">🧹</button>
   </div>
 
   <div class="chatlist" id="chatList"></div>
@@ -122,14 +191,14 @@ body{
 <main class="main">
 <header class="topbar">
   <div>
-    <div id="chatTitle"><b>Yeni sohbet</b></div>
+    <b id="chatTitle">Yeni sohbet</b><br>
     <small>Enter: gönder • Shift+Enter: satır</small>
   </div>
-  <div id="statusText">Hazır</div>
+  <div id="status">Hazır</div>
 </header>
 
 <section class="messages" id="messages">
-  <div class="empty" id="emptyState">
+  <div class="empty" id="empty">
     <div class="empty-card">
       <h3>Nereden başlayalım?</h3>
       <p>Bir mesaj yaz reis.</p>
@@ -142,33 +211,29 @@ body{
 
 <section class="composer">
   <div class="composer-inner">
-    <textarea id="input" class="text" placeholder="Mesaj yaz..."></textarea>
-    <button class="send" id="sendBtn">Gönder</button>
+    <textarea id="input" placeholder="Mesaj yaz..."></textarea>
+    <button class="send" id="send">Gönder</button>
   </div>
 </section>
 </main>
+
 </div>
 
 <script>
-const BACKEND_URL="/api/chat";
-const LS_CHATS="morai_chats";
-const LS_THEME="morai_theme";
+const API="/api/chat";
+const LS="morai_chats";
+let chats=JSON.parse(localStorage.getItem(LS)||"[]");
+let current=null;
 
-let chats=JSON.parse(localStorage.getItem(LS_CHATS)||"[]");
-let currentId=null;
-let sending=false;
-
+function save(){localStorage.setItem(LS,JSON.stringify(chats))}
 function uid(){return Math.random().toString(36).slice(2)}
-function save(){localStorage.setItem(LS_CHATS,JSON.stringify(chats))}
-function byId(id){return chats.find(c=>c.id===id)}
-
-function ensureChat(){
+function ensure(){
   if(!chats.length){
-    const id=uid();
-    chats=[{id,title:"Yeni sohbet",messages:[]}];
-    currentId=id; save();
+    chats=[{id:uid(),title:"Yeni sohbet",messages:[]}];
+    current=chats[0].id;
+    save();
   }
-  if(!currentId) currentId=chats[0].id;
+  if(!current) current=chats[0].id;
 }
 
 function render(){
@@ -176,19 +241,18 @@ function render(){
   list.innerHTML="";
   chats.forEach(c=>{
     const d=document.createElement("div");
+    d.className="chat-item"+(c.id===current?" active":"");
     d.textContent=c.title;
-    d.style.cursor="pointer";
-    d.onclick=()=>{currentId=c.id;render()};
+    d.onclick=()=>{current=c.id;render()};
     list.appendChild(d);
   });
 
-  const chat=byId(currentId);
+  const chat=chats.find(c=>c.id===current);
   document.getElementById("chatTitle").textContent=chat.title;
 
   const wrap=document.getElementById("messages");
-  wrap.querySelectorAll(".row").forEach(n=>n.remove());
-  document.getElementById("emptyState").style.display=
-    chat.messages.length?"none":"flex";
+  wrap.querySelectorAll(".row").forEach(e=>e.remove());
+  document.getElementById("empty").style.display=chat.messages.length?"none":"flex";
 
   chat.messages.forEach(m=>{
     const r=document.createElement("div");
@@ -199,68 +263,60 @@ function render(){
     r.appendChild(b);
     wrap.appendChild(r);
   });
+  wrap.scrollTop=wrap.scrollHeight;
 }
 
-async function sendMessage(){
-  if(sending) return;
+async function send(){
   const input=document.getElementById("input");
   const text=input.value.trim();
   if(!text) return;
-
-  ensureChat();
-  const chat=byId(currentId);
+  ensure();
+  const chat=chats.find(c=>c.id===current);
   if(chat.title==="Yeni sohbet") chat.title=text.slice(0,24);
 
   chat.messages.push({role:"user",content:text});
-  save(); render();
   input.value="";
+  render(); save();
 
-  const history=chat.messages.slice(-10);
-  sending=true;
-  document.getElementById("statusText").textContent="Gönderiliyor…";
+  document.getElementById("status").textContent="Gönderiliyor…";
 
   try{
-    const r=await fetch(BACKEND_URL,{
+    const res=await fetch(API,{
       method:"POST",
       headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({messages:history})
+      body:JSON.stringify({messages:chat.messages.slice(-10)})
     });
-    const d=await r.json();
-    chat.messages.push({role:"ai",content:d.reply||"Boş yanıt"});
+    const data=await res.json();
+    chat.messages.push({role:"ai",content:data.reply||"Boş yanıt"});
   }catch{
     chat.messages.push({role:"ai",content:"Sunucu hatası"});
   }
 
-  sending=false;
-  document.getElementById("statusText").textContent="Hazır";
-  save(); render();
+  document.getElementById("status").textContent="Hazır";
+  render(); save();
 }
 
-document.getElementById("sendBtn").onclick=sendMessage;
+document.getElementById("send").onclick=send;
 document.getElementById("input").addEventListener("keydown",e=>{
-  if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage()}
+  if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send()}
 });
-
 document.querySelectorAll(".quick").forEach(b=>{
   b.onclick=()=>{document.getElementById("input").value=b.dataset.q}
 });
-
-document.getElementById("newChatBtn").onclick=()=>{
+document.getElementById("newChat").onclick=()=>{
   chats.unshift({id:uid(),title:"Yeni sohbet",messages:[]});
-  currentId=chats[0].id; save(); render();
+  current=chats[0].id; save(); render();
 };
-
-document.getElementById("themeBtn").onclick=()=>{
-  document.body.classList.toggle("dark");
-};
-
-document.getElementById("clearAllBtn").onclick=()=>{
+document.getElementById("clear").onclick=()=>{
   if(confirm("Tüm sohbetler silinsin mi?")){
-    chats=[]; currentId=null; save(); ensureChat(); render();
+    chats=[]; current=null; save(); ensure(); render();
   }
 };
+document.getElementById("theme").onclick=()=>{
+  document.body.classList.toggle("light");
+};
 
-ensureChat(); render();
+ensure(); render();
 </script>
 </body>
 </html>
