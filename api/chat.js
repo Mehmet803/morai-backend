@@ -4,7 +4,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { messages = [] } = req.body;
+    const { message, file } = req.body;
 
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
@@ -12,25 +12,18 @@ export default async function handler(req, res) {
     }
 
     const systemPrompt = `
-Sen MorAI’sin.
-Türkçe konuşursun.
-Samimisin ama saçmalamazsın.
-"reis", "kanka" gibi hitapları abartmadan kullanırsın.
-Kısa, net, çözüm odaklı cevap verirsin.
-Bilmediğin konuda uydurmazsın.
-    `.trim();
+Sen MorAI'sin.
+Rahat konuşursun.
+"reis", "kanka" gibi samimi hitaplar kullanırsın.
+Uzatmazsın, net konuşursun.
+Türkçe cevap verirsin.
+Gereksiz resmiyet yok.
+`;
 
-    // 🔹 Gemini formatına çevir
-    const contents = [
-      {
-        role: "user",
-        parts: [{ text: systemPrompt }]
-      },
-      ...messages.map(m => ({
-        role: m.role === "user" ? "user" : "model",
-        parts: [{ text: m.content }]
-      }))
-    ];
+    let finalMessage = message || "";
+    if (file) {
+      finalMessage += "\n\n--- DOSYA İÇERİĞİ ---\n" + file;
+    }
 
     const response = await fetch(
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" +
@@ -38,22 +31,26 @@ Bilmediğin konuda uydurmazsın.
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents }),
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                { text: systemPrompt },
+                { text: finalMessage }
+              ]
+            }
+          ]
+        }),
       }
     );
 
     const data = await response.json();
-
     const reply =
       data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "Valla reis bu sefer cevap gelmedi 😅";
+      "Valla reis bu sefer boş düştü 😅";
 
-    return res.status(200).json({ reply });
-
+    res.status(200).json({ reply });
   } catch (err) {
-    return res.status(500).json({
-      error: "Server error",
-      detail: String(err)
-    });
+    res.status(500).json({ error: "Server error", detail: String(err) });
   }
 }
