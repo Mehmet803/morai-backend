@@ -72,10 +72,8 @@
       display:flex;
     }
 
-    /* Layout */
     .app{width:100%; display:flex; height:100vh; max-width:1400px; margin:0 auto;}
 
-    /* Sidebar */
     .sidebar{
       width:290px;
       background:linear-gradient(to bottom, var(--panel), var(--panel2));
@@ -86,39 +84,20 @@
       gap:12px;
     }
 
-    .brand{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      padding:6px 4px;
-    }
-    .brand-left{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      min-width:0;
-    }
+    .brand{display:flex;align-items:center;justify-content:space-between;}
+    .brand-left{display:flex;align-items:center;gap:10px;}
     .logo{
       width:28px;height:28px;border-radius:999px;
       background: radial-gradient(circle at 30% 30%, #a7f3d0, #22c55e);
       box-shadow: 0 0 18px rgba(34,197,94,.55);
     }
-    .brand-title{
-      font-weight:700;
-      font-size:16px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
+
     .pill{
       font-size:11px;
       padding:4px 8px;
       border-radius:999px;
       background:var(--accentSoft);
       color:var(--accent);
-      border:1px solid rgba(34,197,94,.25);
-      white-space:nowrap;
     }
 
     .btn{
@@ -127,43 +106,19 @@
       color:#fff;
       font-weight:600;
       border-radius:10px;
-      padding:10px 12px;
+      padding:10px;
       cursor:pointer;
-      box-shadow: 0 10px 18px rgba(16,185,129,.25);
-      display:flex; align-items:center; justify-content:center;
-      gap:8px;
-      font-size:14px;
-    }
-
-    .sidebar-tools{display:flex; gap:8px; align-items:center;}
-    .chip-btn{
-      flex:1;
-      border:1px solid var(--border);
-      background:var(--panel);
-      color:var(--text);
-      border-radius:999px;
-      padding:8px 10px;
-      cursor:pointer;
-      font-size:12px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:6px;
     }
 
     .chatlist{
       flex:1;
       overflow:auto;
-      padding:4px;
       border-radius:12px;
       border:1px solid var(--border);
-      background: rgba(255,255,255,.25);
-      backdrop-filter: blur(10px);
+      padding:4px;
     }
-    body.dark .chatlist{background: rgba(2,6,23,.35)}
 
-    /* Main */
-    .main{flex:1; display:flex; flex-direction:column; height:100%;}
+    .main{flex:1;display:flex;flex-direction:column;}
     .topbar{
       height:56px;
       border-bottom:1px solid var(--border);
@@ -171,180 +126,167 @@
       align-items:center;
       justify-content:space-between;
       padding:0 18px;
-      background: rgba(255,255,255,.45);
-      backdrop-filter: blur(10px);
     }
-    body.dark .topbar{background: rgba(2,6,23,.55)}
 
-    .messages{flex:1; overflow:auto; padding:18px 20px 10px; position:relative;}
+    .messages{
+      flex:1;
+      overflow:auto;
+      padding:18px;
+      position:relative;
+    }
 
     .empty{
-      position:absolute; inset:0;
-      display:flex; align-items:center; justify-content:center;
-      padding:20px;
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
     }
-    .empty-card{
-      width:min(560px, 100%);
-      border:1px solid var(--border);
-      border-radius:16px;
-      background: rgba(255,255,255,.55);
-      backdrop-filter: blur(12px);
-      box-shadow: var(--shadow);
-      padding:18px 16px;
-      text-align:center;
-    }
-    body.dark .empty-card{background: rgba(2,6,23,.65)}
 
-    .row{display:flex; margin-bottom:10px;}
+    .empty-card{
+      padding:20px;
+      border-radius:16px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.55);
+    }
+
+    .row{display:flex;margin-bottom:10px;}
     .row.user{justify-content:flex-end;}
     .bubble{
       max-width:72%;
       padding:11px 13px;
       border-radius:16px;
       white-space:pre-wrap;
-      word-wrap:break-word;
-      font-size:14px;
-      line-height:1.45;
     }
-    .bubble.user{background:var(--bubbleUser); color:#ecfdf5;}
+    .bubble.user{background:var(--bubbleUser);color:#fff;}
     .bubble.ai{background:var(--bubbleAI);}
 
     .composer{
       border-top:1px solid var(--border);
-      padding:12px 14px;
-      background: rgba(255,255,255,.55);
-      backdrop-filter: blur(10px);
+      padding:12px;
     }
-    body.dark .composer{background: rgba(2,6,23,.65)}
+
     .composer-inner{
-      display:flex; gap:10px; align-items:flex-end;
-      border:1px solid var(--inputBorder);
-      background:var(--inputBg);
-      border-radius:14px;
-      padding:10px 10px;
+      display:flex;
+      gap:10px;
     }
-    .text{flex:1; resize:none; border:none; outline:none; background:transparent;}
-    .send{border:none; background:var(--accent); color:#fff; font-weight:700; padding:10px 14px; border-radius:12px;}
+
+    .text{
+      flex:1;
+      resize:none;
+      border:none;
+      outline:none;
+    }
+
+    .send{
+      border:none;
+      background:var(--accent);
+      color:#fff;
+      font-weight:700;
+      padding:10px 14px;
+      border-radius:12px;
+    }
   </style>
 </head>
 
 <body class="dark">
 <div class="app">
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="brand">
-      <div class="brand-left">
-        <div class="logo"></div>
-        <div class="brand-title">MorAI</div>
-      </div>
-      <div class="pill">Gemini</div>
+
+<aside class="sidebar">
+  <div class="brand">
+    <div class="brand-left">
+      <div class="logo"></div>
+      <b>MorAI</b>
     </div>
+    <div class="pill">Gemini</div>
+  </div>
 
-    <button class="btn" id="newChatBtn">+ Yeni sohbet</button>
-    <div class="sidebar-tools">
-      <button class="chip-btn" id="themeBtn">🌙 / ☀️ Tema</button>
-      <button class="chip-btn" id="clearAllBtn">🧹 Temizle</button>
+  <button class="btn" id="newChatBtn">+ Yeni sohbet</button>
+  <div class="chatlist" id="chatList"></div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <div>
+      <div id="chatTitle">Yeni sohbet</div>
+      <small>Enter: gönder • Shift+Enter: satır</small>
     </div>
+    <div>Hazır</div>
+  </header>
 
-    <div class="chatlist" id="chatList"></div>
-  </aside>
-
-  <!-- Main -->
-  <main class="main">
-    <header class="topbar">
-      <div>
-        <div id="chatTitle">Yeni sohbet</div>
-        <div>Enter: gönder • Shift+Enter: satır</div>
+  <section class="messages" id="messages">
+    <div class="empty" id="emptyState">
+      <div class="empty-card">
+        <b>Nereden başlayalım?</b><br/>Bir mesaj yaz.
       </div>
-      <div id="statusText">Hazır</div>
-    </header>
+    </div>
+  </section>
 
-    <section class="messages" id="messages">
-      <div class="empty" id="emptyState">
-        <div class="empty-card">
-          <b>Nereden başlayalım?</b><br/>Bir mesaj yaz reis.
-        </div>
-      </div>
-    </section>
+  <section class="composer">
+    <div class="composer-inner">
+      <textarea id="input" class="text"></textarea>
+      <button class="send" id="sendBtn">Gönder</button>
+    </div>
+  </section>
+</main>
 
-    <section class="composer">
-      <div class="composer-inner">
-        <textarea id="input" class="text" placeholder="Mesaj yaz..."></textarea>
-        <button class="send" id="sendBtn">Gönder</button>
-      </div>
-    </section>
-  </main>
 </div>
 
 <script>
-const BACKEND_URL="/api/chat";
-const LS="morai_chats_v2";
+/* ===== SADECE BURASI EKLENDİ (HAFIZA) ===== */
 
-let chats=JSON.parse(localStorage.getItem(LS)||"[]");
-let currentId=chats[0]?.id||null;
-let sending=false;
+const BACKEND_URL = "/api/chat";
+let chats = JSON.parse(localStorage.getItem("morai_mem")||"[]");
+let current = 0;
 
-function uid(){return Math.random().toString(16).slice(2)+"-"+Date.now();}
-function save(){localStorage.setItem(LS,JSON.stringify(chats));}
-function byId(id){return chats.find(c=>c.id===id);}
+if(!chats.length) chats.push({title:"Yeni sohbet",messages:[]});
 
-function ensureChat(){
-  if(!chats.length){
-    const id=uid();
-    chats=[{id,title:"Yeni sohbet",messages:[]}];
-    currentId=id; save();
-  }
-  if(!currentId) currentId=chats[0].id;
-}
-
-function renderAll(){
-  const list=document.getElementById("chatList");
+function render(){
   const box=document.getElementById("messages");
   const empty=document.getElementById("emptyState");
-  list.innerHTML="";
-  chats.forEach(c=>{
-    const d=document.createElement("div");
-    d.textContent=c.title;
-    d.onclick=()=>{currentId=c.id; renderAll();}
-    list.appendChild(d);
-  });
-  [...box.querySelectorAll(".row")].forEach(n=>n.remove());
-  const chat=byId(currentId);
+  box.querySelectorAll(".row").forEach(n=>n.remove());
+
+  const chat=chats[current];
+  document.getElementById("chatTitle").textContent=chat.title;
+
   if(chat.messages.length===0){empty.style.display="flex";return;}
   empty.style.display="none";
+
   chat.messages.forEach(m=>{
     const r=document.createElement("div");
     r.className="row "+m.role;
     const b=document.createElement("div");
     b.className="bubble "+m.role;
     b.textContent=m.content;
-    r.appendChild(b); box.appendChild(r);
+    r.appendChild(b);
+    box.appendChild(r);
   });
 }
 
 async function sendMessage(){
-  if(sending) return;
   const input=document.getElementById("input");
   const text=input.value.trim();
   if(!text) return;
 
-  ensureChat();
-  const chat=byId(currentId);
+  const chat=chats[current];
   if(chat.title==="Yeni sohbet") chat.title=text.slice(0,32);
+
   chat.messages.push({role:"user",content:text});
   input.value="";
-  save(); renderAll();
+  render();
 
-  const history=chat.messages.filter(m=>m.role==="user"||m.role==="ai").slice(-10);
-  sending=true;
+  const history=chat.messages.slice(-10);
 
   const r=await fetch(BACKEND_URL,{
-    method:"POST",headers:{"Content-Type":"application/json"},
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
     body:JSON.stringify({messages:history})
   });
   const j=await r.json();
-  chat.messages.push({role:"ai",content:j.reply||"Cevap gelmedi"});
-  sending=false; save(); renderAll();
+  chat.messages.push({role:"ai",content:j.reply});
+
+  localStorage.setItem("morai_mem",JSON.stringify(chats));
+  render();
 }
 
 document.getElementById("sendBtn").onclick=sendMessage;
@@ -352,12 +294,12 @@ document.getElementById("input").onkeydown=e=>{
   if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage();}
 };
 document.getElementById("newChatBtn").onclick=()=>{
-  const id=uid();
-  chats.unshift({id,title:"Yeni sohbet",messages:[]});
-  currentId=id; save(); renderAll();
+  chats.unshift({title:"Yeni sohbet",messages:[]});
+  current=0;
+  render();
 };
 
-ensureChat(); renderAll();
+render();
 </script>
 </body>
 </html>
