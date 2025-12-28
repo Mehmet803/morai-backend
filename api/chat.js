@@ -1,56 +1,42 @@
-export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Only POST allowed" });
-  }
+// MORAI CHAT + HAFIZA
+
+const API_URL = "https://morai-backend-git-main-mehmets-projects-5ba929d4.vercel.app/api/chat";
+
+// Hafıza (localStorage)
+let memory = JSON.parse(localStorage.getItem("morai_memory")) || [];
+
+// Mesaj gönderme
+async function sendMessage(text) {
+  // Kullanıcı mesajını hafızaya ekle
+  memory.push({ role: "user", content: text });
 
   try {
-    const { message, file } = req.body;
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        messages: memory
+      })
+    });
 
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      return res.status(500).json({ error: "GEMINI_API_KEY missing" });
-    }
+    if (!res.ok) throw new Error("Sunucu hatası");
 
-    const systemPrompt = `
-Sen MorAI'sin.
-Rahat konuşursun.
-"reis", "kanka" gibi samimi hitaplar kullanırsın.
-Uzatmazsın, net konuşursun.
-Türkçe cevap verirsin.
-Gereksiz resmiyet yok.
-`;
+    const data = await res.json();
 
-    let finalMessage = message || "";
-    if (file) {
-      finalMessage += "\n\n--- DOSYA İÇERİĞİ ---\n" + file;
-    }
+    // Bot cevabını hafızaya ekle
+    memory.push({ role: "assistant", content: data.reply });
 
-    const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" +
-        apiKey,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                { text: systemPrompt },
-                { text: finalMessage }
-              ]
-            }
-          ]
-        }),
-      }
-    );
+    // Hafızayı kaydet
+    localStorage.setItem("morai_memory", JSON.stringify(memory));
 
-    const data = await response.json();
-    const reply =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "Valla reis bu sefer boş düştü 😅";
-
-    res.status(200).json({ reply });
+    return data.reply;
   } catch (err) {
-    res.status(500).json({ error: "Server error", detail: String(err) });
+    return "Sunucu hatası: Failed to fetch";
   }
+}
+
+// Hafızayı temizle
+function clearMemory() {
+  memory = [];
+  localStorage.removeItem("morai_memory");
 }
